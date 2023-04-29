@@ -1,0 +1,1 @@
+# voicevoxcore.go
