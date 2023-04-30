@@ -4,46 +4,45 @@ package voicevoxcorego
 // #include <voicevox_core.h>
 import "C"
 
-type VoicevoxCore struct {
-}
+type RawVoicevoxCore struct{}
 
-func VoicevoxMakeDefaultInitializeOptions() C.VoicevoxInitializeOptions {
+func (r *RawVoicevoxCore) VoicevoxMakeDefaultInitializeOptions() C.VoicevoxInitializeOptions {
 	return C.voicevox_make_default_initialize_options()
 }
 
-func VoicevoxInitialize(options C.VoicevoxInitializeOptions) C.int {
+func (r *RawVoicevoxCore) VoicevoxInitialize(options C.VoicevoxInitializeOptions) C.int {
 	return C.voicevox_initialize(options)
 }
 
-func VoicevoxGetVersion() *C.char {
+func (r *RawVoicevoxCore) VoicevoxGetVersion() *C.char {
 	return C.voicevox_get_version()
 }
 
-func VoicevoxLoadModel(speakerID C.uint) C.int {
+func (r *RawVoicevoxCore) VoicevoxLoadModel(speakerID C.uint) C.int {
 	return C.voicevox_load_model(speakerID)
 }
 
-func VoicevoxIsGpuMode() C.bool {
+func (r *RawVoicevoxCore) VoicevoxIsGpuMode() C.bool {
 	return C.voicevox_is_gpu_mode()
 }
 
-func VoicevoxIsModelLoaded(speakerID C.uint) C.bool {
+func (r *RawVoicevoxCore) VoicevoxIsModelLoaded(speakerID C.uint) C.bool {
 	return C.voicevox_is_model_loaded(speakerID)
 }
 
-func VoicevoxFinalize() C.void {
+func (r *RawVoicevoxCore) VoicevoxFinalize() C.void {
 	return C.voicevox_finalize()
 }
 
-func VoicevoxGetMetasJson() *C.char {
+func (r *RawVoicevoxCore) VoicevoxGetMetasJson() *C.char {
 	return C.voicevox_get_metas_json()
 }
 
-func VoicevoxGetSupportedDevicesJson() *C.char {
+func (r *RawVoicevoxCore) VoicevoxGetSupportedDevicesJson() *C.char {
 	return C.voicevox_get_supported_devices_json()
 }
 
-func VoicevoxPredictDuration(
+func (r *RawVoicevoxCore) VoicevoxPredictDuration(
 	length C.ulong,
 	phonemeVector *C.longlong,
 	speakerID C.uint,
@@ -59,11 +58,11 @@ func VoicevoxPredictDuration(
 	)
 }
 
-func VoicevoxPredictDurationDataFree(predictDurationData *C.float) C.void {
+func (r *RawVoicevoxCore) VoicevoxPredictDurationDataFree(predictDurationData *C.float) C.void {
 	return C.voicevox_predict_duration_data_free(predictDurationData)
 }
 
-func VoicevoxPredictIntonation(
+func (r *RawVoicevoxCore) VoicevoxPredictIntonation(
 	length C.ulong,
 	vowel_phoneme_vector *C.longlong,
 	consonantPhonemeVector *C.longlong,
@@ -89,11 +88,11 @@ func VoicevoxPredictIntonation(
 	)
 }
 
-func VoicevoxPredictIntonationDataFree(predictIntonationData *C.float) C.void {
+func (r *RawVoicevoxCore) VoicevoxPredictIntonationDataFree(predictIntonationData *C.float) C.void {
 	return C.voicevox_predict_intonation_data_free(predictIntonationData)
 }
 
-func VoicevoxDecode(
+func (r *RawVoicevoxCore) VoicevoxDecode(
 	length C.ulong,
 	phonemeSize C.ulong,
 	f0 *C.float,
@@ -112,15 +111,15 @@ func VoicevoxDecode(
 		outputDecodeData)
 }
 
-func VoicevoxDecodeDataFree(decodeData *C.float) C.void {
+func (r *RawVoicevoxCore) VoicevoxDecodeDataFree(decodeData *C.float) C.void {
 	return C.voicevox_decode_data_free(decodeData)
 }
 
-func VoicevoxMakeDefaultAudioQueryOptions() C.VoicevoxAudioQueryOptions {
+func (r *RawVoicevoxCore) VoicevoxMakeDefaultAudioQueryOptions() C.VoicevoxAudioQueryOptions {
 	return C.voicevox_make_default_audio_query_options()
 }
 
-func VoicevoxAudioQuery(
+func (r *RawVoicevoxCore) VoicevoxAudioQuery(
 	text *C.char,
 	speakerID C.uint,
 	options C.VoicevoxAudioQueryOptions,
@@ -129,11 +128,11 @@ func VoicevoxAudioQuery(
 	return C.voicevox_audio_query(text, speakerID, options, outputAudioQueryJson)
 }
 
-func VoicevoxMakeDefaultSynthesisOptions() C.VoicevoxSynthesisOptions {
+func (r *RawVoicevoxCore) VoicevoxMakeDefaultSynthesisOptions() C.VoicevoxSynthesisOptions {
 	return C.voicevox_make_default_synthesis_options()
 }
 
-func VoicevoxSynthesis(
+func (r *RawVoicevoxCore) VoicevoxSynthesis(
 	audioQueryJson *C.char,
 	speakerID C.uint,
 	options C.VoicevoxSynthesisOptions,
@@ -143,34 +142,34 @@ func VoicevoxSynthesis(
 	return C.voicevox_synthesis(audioQueryJson, speakerID, options, outputWavLength, outputWav)
 }
 
-func VoicevoxMakeDefaultTtsOptions() C.VoicevoxTtsOptions {
+func (r *RawVoicevoxCore) VoicevoxMakeDefaultTtsOptions() C.VoicevoxTtsOptions {
 	return C.voicevox_make_default_tts_options()
 }
 
-func VoicevoxTts(
+func (r *RawVoicevoxCore) VoicevoxTts(
 	text *C.char,
 	speakerID C.uint,
 	options C.VoicevoxTtsOptions,
-	outputWavLength C.ulong,
+	outputWavLength *C.ulong,
 	outputWav **C.uchar,
 ) C.int {
 	return C.voicevox_tts(
 		text,
 		speakerID,
 		options,
-		&outputWavLength,
+		outputWavLength,
 		outputWav,
 	)
 }
 
-func VoicevoxAudioQueryJsonFree(audioQueryJson *C.char) C.void {
+func (r *RawVoicevoxCore) VoicevoxAudioQueryJsonFree(audioQueryJson *C.char) C.void {
 	return C.voicevox_audio_query_json_free(audioQueryJson)
 }
 
-func VoicevoxWavFree(wav *C.uchar) C.void {
+func (r *RawVoicevoxCore) VoicevoxWavFree(wav *C.uchar) C.void {
 	return C.voicevox_wav_free(wav)
 }
 
-func VoicevoxErrorResultToMessage(resultCode C.VoicevoxResultCode) *C.char {
+func (r *RawVoicevoxCore) VoicevoxErrorResultToMessage(resultCode C.VoicevoxResultCode) *C.char {
 	return C.voicevox_error_result_to_message(resultCode)
 }
