@@ -4,6 +4,7 @@ package voicevoxcorego
 // #include <voicevox_core.h>
 import "C"
 
+// RawVoicevoxCore is a function group that wraps the C API
 type RawVoicevoxCore struct{}
 
 func (r *RawVoicevoxCore) VoicevoxMakeDefaultInitializeOptions() C.VoicevoxInitializeOptions {

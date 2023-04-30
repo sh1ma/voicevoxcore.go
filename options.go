@@ -5,17 +5,24 @@ package voicevoxcorego
 import "C"
 
 type (
+	// VoicevoxInitializeOptions is the options for Intializing voicevox_core
 	VoicevoxInitializeOptions struct {
+		// VoicevoxInitializeOptions defined in the C API
 		Raw *C.VoicevoxInitializeOptions
 	}
-
+	// VoicevoxAudioQueryOptions is the options for Audio Query
 	VoicevoxAudioQueryOptions struct {
+		// VoicevoxAudioQueryOptions defined in the C API
 		Raw *C.VoicevoxAudioQueryOptions
 	}
+	// VoicevoxSynthesisOptions is the options for Synthesising
 	VoicevoxSynthesisOptions struct {
+		// VoicevoxSynthesisOptions defined in the C API
 		Raw *C.VoicevoxSynthesisOptions
 	}
+	// VoicevoxSynthesisOptions is the options for Text to Speech
 	VoicevoxTtsOptions struct {
+		// C.VoicevoxTtsOptions defined in the C API
 		Raw *C.VoicevoxTtsOptions
 	}
 )

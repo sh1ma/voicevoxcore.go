@@ -6,6 +6,7 @@ import (
 	"unsafe"
 )
 
+// VoicevoxCore is top-level API Wrapper instance
 type VoicevoxCore struct {
 	rawCore     *RawVoicevoxCore
 	initialized bool
