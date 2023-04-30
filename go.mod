@@ -1,3 +1,3 @@
-module github.com/sh1ma/voicevox.go
+module github.com/sh1ma/voicevoxcore.go
 
 go 1.20
