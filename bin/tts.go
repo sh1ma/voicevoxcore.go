@@ -25,8 +25,8 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	ttasOptions := voicevoxcorego.NewVoicevoxTtsOptions(false, true)
-	result, err := core.Tts(text, 1, ttasOptions)
+	ttsOptions := voicevoxcorego.NewVoicevoxTtsOptions(false, true)
+	result, err := core.Tts(text, 1, ttsOptions)
 	if err != nil {
 		fmt.Println(err)
 	}
