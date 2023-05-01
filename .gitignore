@@ -22,3 +22,6 @@ go.work
 
 # wav file created by bin
 *.wav
+
+# openJTalkの辞書はignoreして良い
+open_jtalk_dict_dir*
