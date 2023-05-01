@@ -59,3 +59,31 @@ func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOption
 	slicebytes = C.GoBytes(unsafe.Pointer(sliceUnsafe), C.int((len(slice))))
 	return
 }
+
+func (r *VoicevoxCore) Synthesis(
+	audioQuery string,
+	speakerID int,
+	options VoicevoxSynthesisOptions,
+) (slicebytes []byte, err error) {
+	ctext := C.CString(audioQuery)
+	cspeakerID := C.uint(speakerID)
+
+	var size int
+	data := make([]*C.uchar, 1)
+	// cbyte := C.getCByte()
+	datap := (**C.uchar)(&data[0])
+	defer r.rawCore.VoicevoxWavFree(*datap)
+
+	sizep := (*C.ulong)(unsafe.Pointer(&size))
+
+	code := r.rawCore.VoicevoxSynthesis(ctext, cspeakerID, *options.Raw, sizep, datap)
+	if int(code) != 0 {
+		err = errors.New("Failed TTS")
+		return
+	}
+
+	slice := unsafe.Slice(data[0], *sizep)
+	sliceUnsafe := unsafe.SliceData(slice)
+	slicebytes = C.GoBytes(unsafe.Pointer(sliceUnsafe), C.int((len(slice))))
+	return
+}
