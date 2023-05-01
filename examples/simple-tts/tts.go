@@ -20,6 +20,7 @@ func main() {
 	core := voicevoxcorego.NewVoicevoxCore()
 	initializeOptions := voicevoxcorego.NewVoicevoxInitializeOptions(0, 0, false, "./open_jtalk_dic_utf_8-1.11")
 	err := core.Initialize(initializeOptions)
+	defer core.Finalize()
 	if err != nil {
 		fmt.Println(err)
 	}

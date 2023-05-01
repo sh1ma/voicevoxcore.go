@@ -94,3 +94,7 @@ func (r *VoicevoxCore) Synthesis(
 	slicebytes = C.GoBytes(unsafe.Pointer(sliceUnsafe), C.int((len(slice))))
 	return
 }
+
+func (r *VoicevoxCore) Finalize() {
+	r.rawCore.VoicevoxFinalize()
+}
