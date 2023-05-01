@@ -39,6 +39,7 @@ func main() {
 		fmt.Println(err)
 	}
 	f, _ := os.Create("out.wav")
+	defer f.Close()
 	_, err = f.Write(result)
 	if err != nil {
 		fmt.Println(err)
