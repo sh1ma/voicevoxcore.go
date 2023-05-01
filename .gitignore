@@ -20,5 +20,5 @@
 # Go workspace file
 go.work
 
-# file created by bin/tts.go 
-out.wav
+# wav file created by bin
+*.wav
