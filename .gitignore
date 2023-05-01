@@ -24,4 +24,4 @@ go.work
 *.wav
 
 # openJTalkの辞書はignoreして良い
-open_jtalk_dict_dir*
+open_jtalk_dic*
