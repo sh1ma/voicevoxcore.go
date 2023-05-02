@@ -48,6 +48,7 @@ func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOption
 	// TODO: このあたりを関数にまとめる
 	var size int
 	data := make([]*C.uchar, 1)
+	// NOTE: ここキャストする必要ない
 	datap := (**C.uchar)(&data[0])
 	defer r.rawCore.VoicevoxWavFree(*datap)
 
@@ -78,6 +79,7 @@ func (r *VoicevoxCore) Synthesis(
 	// HACK: 煩雑なコード。Tts()のTODOと一緒の関数にまとめる
 	var size int
 	data := make([]*C.uchar, 1)
+	// NOTE: ここキャストする必要ない
 	datap := (**C.uchar)(&data[0])
 	defer r.rawCore.VoicevoxWavFree(*datap)
 
@@ -93,6 +95,41 @@ func (r *VoicevoxCore) Synthesis(
 	sliceUnsafe := unsafe.SliceData(slice)
 	slicebytes = C.GoBytes(unsafe.Pointer(sliceUnsafe), C.int((len(slice))))
 	return
+}
+
+func (r *VoicevoxCore) MakeDefaultInitializeOptions() VoicevoxInitializeOptions {
+	raw := r.rawCore.VoicevoxMakeDefaultInitializeOptions()
+	return VoicevoxInitializeOptions{Raw: &raw}
+}
+
+func (r *VoicevoxCore) MakeDefaultTtsOotions() VoicevoxTtsOptions {
+	raw := r.rawCore.VoicevoxMakeDefaultTtsOptions()
+	return VoicevoxTtsOptions{Raw: &raw}
+}
+
+func (r *VoicevoxCore) MakeDefaultAudioQueryOotions() VoicevoxAudioQueryOptions {
+	raw := r.rawCore.VoicevoxMakeDefaultAudioQueryOptions()
+	return VoicevoxAudioQueryOptions{Raw: &raw}
+}
+
+func (r *VoicevoxCore) MakeDefaultSynthesisOotions() VoicevoxSynthesisOptions {
+	raw := r.rawCore.VoicevoxMakeDefaultSynthesisOptions()
+	return VoicevoxSynthesisOptions{Raw: &raw}
+}
+
+func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) string {
+	ctext := C.CString(text)
+	cSpeakerID := C.uint(speakerID)
+
+	data := make([]*C.char, 1)
+	datap := &data[0]
+	defer r.rawCore.VoicevoxAudioQueryJsonFree(*datap)
+
+	r.rawCore.VoicevoxAudioQuery(ctext, cSpeakerID, *options.Raw, datap)
+
+	audioQueryJson := C.GoString(*datap)
+
+	return audioQueryJson
 }
 
 func (r *VoicevoxCore) Finalize() {
