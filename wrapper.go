@@ -142,3 +142,34 @@ func (r *VoicevoxCore) ErrorResultToMessage(resultCode int) string {
 
 	return C.GoString(retValue)
 }
+
+func (r *VoicevoxCore) GetMetasJson() string {
+	cResult := r.rawCore.VoicevoxGetMetasJson()
+
+	return C.GoString(cResult)
+}
+
+func (r *VoicevoxCore) GetSupportedDevicesJson() string {
+	cResult := r.rawCore.VoicevoxGetSupportedDevicesJson()
+
+	return C.GoString(cResult)
+}
+
+func (r *VoicevoxCore) GetCoreVersion() string {
+	cResult := r.rawCore.VoicevoxGetVersion()
+
+	return C.GoString(cResult)
+}
+
+func (r *VoicevoxCore) IsGpuMode() bool {
+	cResult := r.rawCore.VoicevoxIsGpuMode()
+
+	return bool(cResult)
+}
+
+func (r *VoicevoxCore) IsModelLoaded(speakerID uint) bool {
+	cSpeakerID := C.uint(speakerID)
+	cResult := r.rawCore.VoicevoxIsModelLoaded(cSpeakerID)
+
+	return bool(cResult)
+}
