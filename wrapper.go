@@ -135,3 +135,10 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 func (r *VoicevoxCore) Finalize() {
 	r.rawCore.VoicevoxFinalize()
 }
+
+func (r *VoicevoxCore) ErrorResultToMessage(resultCode int) string {
+	cResultCode := C.int(resultCode)
+	retValue := r.rawCore.VoicevoxErrorResultToMessage(cResultCode)
+
+	return C.GoString(retValue)
+}
