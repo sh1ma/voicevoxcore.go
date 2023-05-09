@@ -45,7 +45,7 @@ func (r *RawVoicevoxCore) VoicevoxGetSupportedDevicesJson() *C.char {
 
 func (r *RawVoicevoxCore) VoicevoxPredictDuration(
 	length C.ulong,
-	phonemeVector *C.longlong,
+	phonemeVector *C.int64_t,
 	speakerID C.uint,
 	outputPredictDurationDataLength C.ulong,
 	outputPredictDurationData **C.float,
@@ -65,12 +65,12 @@ func (r *RawVoicevoxCore) VoicevoxPredictDurationDataFree(predictDurationData *C
 
 func (r *RawVoicevoxCore) VoicevoxPredictIntonation(
 	length C.ulong,
-	vowel_phoneme_vector *C.longlong,
-	consonantPhonemeVector *C.longlong,
-	startAccentVector *C.longlong,
-	endAccentVector *C.longlong,
-	startAccentPhraseVector *C.longlong,
-	endAccentPhraseVector *C.longlong,
+	vowel_phoneme_vector *C.int64_t,
+	consonantPhonemeVector *C.int64_t,
+	startAccentVector *C.int64_t,
+	endAccentVector *C.int64_t,
+	startAccentPhraseVector *C.int64_t,
+	endAccentPhraseVector *C.int64_t,
 	speakerID C.uint,
 	outputPredictIntonationDataLength *C.ulong,
 	outputPredictIntonationData **C.float,
