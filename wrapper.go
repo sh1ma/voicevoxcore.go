@@ -1,5 +1,6 @@
 package voicevoxcorego
 
+// #include <stdint.h>
 import "C"
 import (
 	"errors"
@@ -201,4 +202,63 @@ func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []f
 	}
 
 	return retValue
+}
+
+func (r *VoicevoxCore) PredictIntonation(
+	speakerID int,
+	vowelPhonemeVector, consonantPhonemeVector []int64,
+	startAccentVector, endAccentVector []int64,
+	startAccentPhraseVector, endAccentPhraseVector []int64,
+) ([]float32, error) {
+
+	// 全てのlengthが同数かのチェック
+	length := len(vowelPhonemeVector)
+	otherLengths := []int{
+		len(consonantPhonemeVector),
+		len(startAccentPhraseVector), len(endAccentVector),
+		len(startAccentPhraseVector), len(endAccentPhraseVector),
+	}
+	for _, l := range otherLengths {
+		if length != l {
+			return nil, errors.New("全てのベクター変数は同じ長さでなければなりません。")
+		}
+	}
+
+	cLength := C.ulong(length)
+	cSpeakerID := C.uint(speakerID)
+
+	// []int64を[]C.int64に変換する関数
+	int64ToCtype := sliceToCtype[int64, C.int64_t]
+
+	// それぞれのVectorに `int64ToCtype` を適用する
+	cVowelPhonemeVector := int64ToCtype(vowelPhonemeVector)
+	cConsonantPhonemeVecor := int64ToCtype(consonantPhonemeVector)
+	cStartAccentVector := int64ToCtype(startAccentPhraseVector)
+	cEndAccentVector := int64ToCtype(endAccentVector)
+	cStartAccentPhraseVector := int64ToCtype(startAccentPhraseVector)
+	cEndAccentPhraseVector := int64ToCtype(endAccentPhraseVector)
+
+	// 返り値のデータの出力先を用意する
+	datap, sizep, data, _ := makeDataReceiver[*C.float, C.ulong]()
+
+	defer r.voicevoxPredictIntonationDataFree(*datap)
+
+	r.voicevoxPredictIntonation(
+		cLength,
+		&cVowelPhonemeVector, &cConsonantPhonemeVecor,
+		&cStartAccentVector, &cEndAccentVector,
+		&cStartAccentPhraseVector, &cEndAccentPhraseVector,
+		cSpeakerID,
+		sizep, datap,
+	)
+
+	slice := unsafe.Slice(data[0], *sizep)
+
+	retValue := make([]float32, length)
+
+	for i, v := range slice {
+		retValue[i] = float32(v)
+	}
+
+	return retValue, nil
 }
