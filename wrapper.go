@@ -8,13 +8,13 @@ import (
 
 // VoicevoxCore is top-level API Wrapper instance
 type VoicevoxCore struct {
-	rawCore     *RawVoicevoxCore
+	*RawVoicevoxCore
 	initialized bool
 }
 
 // VoicevoxCore のコンストラクタ関数
 func NewVoicevoxCore() (core VoicevoxCore) {
-	core = VoicevoxCore{rawCore: &RawVoicevoxCore{}}
+	core = VoicevoxCore{}
 	return
 }
 
@@ -24,7 +24,7 @@ func (r *VoicevoxCore) Initialize(options VoicevoxInitializeOptions) (err error)
 		err = errors.New("Already initialized")
 		return
 	}
-	r.rawCore.VoicevoxInitialize(*options.Raw)
+	r.voicevoxInitialize(*options.Raw)
 	r.initialized = true
 	return
 }
@@ -32,7 +32,7 @@ func (r *VoicevoxCore) Initialize(options VoicevoxInitializeOptions) (err error)
 // 音声合成モデルをロードする関数
 func (r *VoicevoxCore) LoadModel(speakerID int) (err error) {
 	id := C.uint(speakerID)
-	code := r.rawCore.VoicevoxLoadModel(id)
+	code := r.voicevoxLoadModel(id)
 	if int(code) != 0 {
 		err = errors.New("Model load Failed")
 	}
@@ -50,11 +50,11 @@ func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOption
 	data := make([]*C.uchar, 1)
 	// NOTE: ここキャストする必要ない
 	datap := (**C.uchar)(&data[0])
-	defer r.rawCore.VoicevoxWavFree(*datap)
+	defer r.voicevoxWavFree(*datap)
 
 	sizep := (*C.ulong)(unsafe.Pointer(&size))
 
-	code := r.rawCore.VoicevoxTts(ctext, cspeakerID, *options.Raw, sizep, datap)
+	code := r.voicevoxTts(ctext, cspeakerID, *options.Raw, sizep, datap)
 	if int(code) != 0 {
 		err = errors.New("Failed TTS")
 		return
@@ -81,11 +81,11 @@ func (r *VoicevoxCore) Synthesis(
 	data := make([]*C.uchar, 1)
 	// NOTE: ここキャストする必要ない
 	datap := (**C.uchar)(&data[0])
-	defer r.rawCore.VoicevoxWavFree(*datap)
+	defer r.voicevoxWavFree(*datap)
 
 	sizep := (*C.ulong)(unsafe.Pointer(&size))
 
-	code := r.rawCore.VoicevoxSynthesis(ctext, cspeakerID, *options.Raw, sizep, datap)
+	code := r.voicevoxSynthesis(ctext, cspeakerID, *options.Raw, sizep, datap)
 	if int(code) != 0 {
 		err = errors.New("Failed TTS")
 		return
@@ -98,23 +98,27 @@ func (r *VoicevoxCore) Synthesis(
 }
 
 func (r *VoicevoxCore) MakeDefaultInitializeOptions() VoicevoxInitializeOptions {
-	raw := r.rawCore.VoicevoxMakeDefaultInitializeOptions()
+	raw := r.voicevoxMakeDefaultInitializeOptions()
 	return VoicevoxInitializeOptions{Raw: &raw}
 }
 
 func (r *VoicevoxCore) MakeDefaultTtsOotions() VoicevoxTtsOptions {
-	raw := r.rawCore.VoicevoxMakeDefaultTtsOptions()
+	raw := r.voicevoxMakeDefaultTtsOptions()
 	return VoicevoxTtsOptions{Raw: &raw}
 }
 
 func (r *VoicevoxCore) MakeDefaultAudioQueryOotions() VoicevoxAudioQueryOptions {
-	raw := r.rawCore.VoicevoxMakeDefaultAudioQueryOptions()
+	raw := r.voicevoxMakeDefaultAudioQueryOptions()
 	return VoicevoxAudioQueryOptions{Raw: &raw}
 }
 
 func (r *VoicevoxCore) MakeDefaultSynthesisOotions() VoicevoxSynthesisOptions {
-	raw := r.rawCore.VoicevoxMakeDefaultSynthesisOptions()
+	raw := r.voicevoxMakeDefaultSynthesisOptions()
 	return VoicevoxSynthesisOptions{Raw: &raw}
+}
+
+func (r *VoicevoxCore) MakeDefaultAccentPhrasesOptions() {
+
 }
 
 func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) string {
@@ -123,9 +127,9 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 
 	data := make([]*C.char, 1)
 	datap := &data[0]
-	defer r.rawCore.VoicevoxAudioQueryJsonFree(*datap)
+	defer r.voicevoxAudioQueryJsonFree(*datap)
 
-	r.rawCore.VoicevoxAudioQuery(ctext, cSpeakerID, *options.Raw, datap)
+	r.voicevoxAudioQuery(ctext, cSpeakerID, *options.Raw, datap)
 
 	audioQueryJson := C.GoString(*datap)
 
@@ -133,43 +137,43 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 }
 
 func (r *VoicevoxCore) Finalize() {
-	r.rawCore.VoicevoxFinalize()
+	r.voicevoxFinalize()
 }
 
 func (r *VoicevoxCore) ErrorResultToMessage(resultCode int) string {
 	cResultCode := C.int(resultCode)
-	retValue := r.rawCore.VoicevoxErrorResultToMessage(cResultCode)
+	retValue := r.voicevoxErrorResultToMessage(cResultCode)
 
 	return C.GoString(retValue)
 }
 
 func (r *VoicevoxCore) GetMetasJson() string {
-	cResult := r.rawCore.VoicevoxGetMetasJson()
+	cResult := r.voicevoxGetMetasJson()
 
 	return C.GoString(cResult)
 }
 
 func (r *VoicevoxCore) GetSupportedDevicesJson() string {
-	cResult := r.rawCore.VoicevoxGetSupportedDevicesJson()
+	cResult := r.voicevoxGetSupportedDevicesJson()
 
 	return C.GoString(cResult)
 }
 
 func (r *VoicevoxCore) GetCoreVersion() string {
-	cResult := r.rawCore.VoicevoxGetVersion()
+	cResult := r.voicevoxGetVersion()
 
 	return C.GoString(cResult)
 }
 
 func (r *VoicevoxCore) IsGpuMode() bool {
-	cResult := r.rawCore.VoicevoxIsGpuMode()
+	cResult := r.voicevoxIsGpuMode()
 
 	return bool(cResult)
 }
 
 func (r *VoicevoxCore) IsModelLoaded(speakerID uint) bool {
 	cSpeakerID := C.uint(speakerID)
-	cResult := r.rawCore.VoicevoxIsModelLoaded(cSpeakerID)
+	cResult := r.voicevoxIsModelLoaded(cSpeakerID)
 
 	return bool(cResult)
 }
