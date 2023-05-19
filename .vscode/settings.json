@@ -1,5 +1,4 @@
 {
-  "[go]": {
-    "editor.defaultFormatter": "golang.go"
-  },
+  "go.lintTool": "golangci-lint",
+  "go.formatTool": "default",
 }
