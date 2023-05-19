@@ -262,3 +262,31 @@ func (r *VoicevoxCore) PredictIntonation(
 
 	return retValue, nil
 }
+
+func (r *VoicevoxCore) Decode(speakerID uint, phonemeSize int, f0 []float32, phonemeVector []float32) ([]float32, error) {
+	length := len(f0)
+
+	float32ToCtype := sliceToCtype[float32, C.float]
+
+	cSpeakerID := (C.uint)(speakerID)
+	cLength := (C.uintptr_t)(length)
+	cPhonemeSize := (C.uintptr_t)(phonemeSize)
+	cF0 := float32ToCtype(f0)
+	cPhonemeVector := float32ToCtype(phonemeVector)
+
+	datap, sizep, data, _ := makeDataReceiver[*C.float, C.uintptr_t]()
+
+	defer r.voicevoxDecodeDataFree(*datap)
+
+	r.voicevoxDecode(cLength, cPhonemeSize, &cF0, &cPhonemeVector, cSpeakerID, sizep, datap)
+
+	slice := unsafe.Slice(data[0], *sizep)
+
+	var retValue []float32
+
+	for _, v := range slice {
+		retValue = append(retValue, float32(v))
+	}
+
+	return retValue, nil
+}
