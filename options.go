@@ -1,6 +1,5 @@
 package voicevoxcorego
 
-// #cgo LDFLAGS: -lvoicevox_core
 // #include <voicevox_core.h>
 import "C"
 

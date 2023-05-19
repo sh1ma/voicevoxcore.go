@@ -177,3 +177,28 @@ func (r *VoicevoxCore) IsModelLoaded(speakerID uint) bool {
 
 	return bool(cResult)
 }
+
+func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []float32 {
+
+	length := len(phonemeVector)
+
+	var size uint32
+	data := make([]*C.float, 1)
+	datap := &data[0]
+	sizep := (*C.ulong)(unsafe.Pointer(&size))
+	cPhonemeVectoTmp := &phonemeVector[0]
+	cPhonemeVectorPtr := (*C.int64_t)(cPhonemeVectoTmp)
+	phonemeVectorLength := (C.ulong)(length)
+	r.voicevoxPredictDuration(phonemeVectorLength, cPhonemeVectorPtr, C.uint(speakerID), sizep, datap)
+	defer r.voicevoxPredictDurationDataFree(*datap)
+
+	slice := unsafe.Slice(data[0], *sizep)
+
+	retValue := make([]float32, length)
+
+	for i, v := range slice {
+		retValue[i] = float32(v)
+	}
+
+	return retValue
+}
