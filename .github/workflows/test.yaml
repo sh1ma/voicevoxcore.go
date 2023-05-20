@@ -51,14 +51,11 @@ jobs:
           key: ${{ runner.os }}-core
 
       - name: Set CGO_LDFLAGS & CGO_CFLAGS
-        env:
-          CGO_LDFLAGS: '-Lvoicevox_core -O2 -g'
-          CGO_CFLAGS: '-Ivoicevox_core -O2 -g'
         run: |
           echo CGO_LDFLAGS=-L"$(pwd)/voicevox_core -O2 -g" >> $GITHUB_ENV
           echo CGO_CFLAGS="-I$(pwd)/voicevox_core -O2 -g" >> $GITHUB_ENV
+          echo LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)/voicevox_core" >> $GITHUB_ENV
 
       - name: Execute Test
         run: |
-          go env
           go test --cover
