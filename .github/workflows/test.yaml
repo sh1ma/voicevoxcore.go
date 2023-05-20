@@ -25,7 +25,7 @@ jobs:
 
       - name: Try restore cache
         id: core-cache
-        uses: actions/cache@v1.2.1
+        uses: actions/cache/restore@v3
         with:
           path: |
             voicevox_core
@@ -43,18 +43,22 @@ jobs:
 
       - name: Save cache
         if: steps.core-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v1.2.1
+        uses: actions/cache/save@v3
         with:
           path: |
             voicevox_core
             open_jtalk_dic_utf_8-1.11
-          key: ${{ runner.os }}-cache-${{ hashFiles('**/VERSION') }}
+          key: ${{ runner.os }}-core
 
-      - name: Create symlinks
+      - name: Set CGO_LDFLAGS & CGO_CFLAGS
+        env:
+          CGO_LDFLAGS: '-Lvoicevox_core -O2 -g'
+          CGO_CFLAGS: '-Ivoicevox_core -O2 -g'
         run: |
-          ln -fs `pwd`/voicevox_core/libvoicevox_core.so `pwd`/voicevox_core/libonnxruntime.so.1.13.1 /usr/lib
-          ln -fs `pwd`/voicevox_core/voicevox_core.h /usr/include
-          cp -r `pwd`/voicevox_core/model /usr/lib/
+          echo CGO_LDFLAGS=-L"$(pwd)/voicevox_core -O2 -g" >> $GITHUB_ENV
+          echo CGO_CFLAGS="-I$(pwd)/voicevox_core -O2 -g" >> $GITHUB_ENV
 
       - name: Execute Test
-        run: go test --cover
+        run: |
+          go env
+          go test --cover
