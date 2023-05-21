@@ -1,6 +1,10 @@
 name: 'CI: Test'
 on:
   push:
+    paths:
+      - '**.go'
+      - 'go.sum'
+      - 'go.mod'
     branches:
       - main
   pull_request:
@@ -19,7 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Go environment
-        uses: actions/setup-go@v4.0.1
+        uses: actions/setup-go@v4
         with:
           go-version: '1.20'
 
