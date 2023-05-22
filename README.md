@@ -1,7 +1,6 @@
 # voicevoxcore.go
 
 [![CI: Test](https://github.com/sh1ma/voicevoxcore.go/actions/workflows/test.yaml/badge.svg)](https://github.com/sh1ma/voicevoxcore.go/actions/workflows/test.yaml)
-
 [![golangci-lint](https://github.com/sh1ma/voicevoxcore.go/actions/workflows/lint.yaml/badge.svg)](https://github.com/sh1ma/voicevoxcore.go/actions/workflows/lint.yaml)
 
 voicevoxcore.go は[voicevox_core](https://github.com/VOICEVOX/voicevox_core)を Go 言語で使えるラッパーです。
