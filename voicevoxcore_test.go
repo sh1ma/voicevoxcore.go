@@ -33,31 +33,45 @@ func TestTts(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	WAV_MAGICNUMBER_FIRST := []byte{0x52, 0x49, 0x46, 0x46}
-	WAV_MAGICNUMBER_SECOND := []byte{0x57, 0x41, 0x56, 0x45}
-
-	t.Log("assert magicnumber")
-	assert.Equal(t, WAV_MAGICNUMBER_FIRST, result[:4])
-	assert.Equal(t, WAV_MAGICNUMBER_SECOND, result[8:12])
+	isWavFile(t, result)
 }
 
 // nolint:errcheck
-// func TestSynthesis(t *testing.T) {
-// 	t.Log("Run AudioQuery()")
+func TestSynthesis(t *testing.T) {
+	t.Log("Run AudioQuery()")
 
-// 	t.Log("initialize")
-// 	core := setupCore()
-// 	defer core.Finalize()
-// 	t.Log("initialize done")
+	t.Log("initialize")
+	core := setupCore()
+	defer core.Finalize()
+	t.Log("initialize done")
 
-// 	t.Log("load model")
-// 	core.LoadModel(1)
-// 	t.Log("load model done")
+	t.Log("load model")
+	core.LoadModel(1)
+	t.Log("load model done")
 
-// 	aqOptions := core.MakeDefaultAudioQueryOotions()
+	// AudioQueryを生成
+	aqOptions := core.MakeDefaultAudioQueryOotions()
+	query := core.AudioQuery("テストなのだね", 1, aqOptions)
 
-// 	query := core.AudioQuery("テストなのだね", 1, aqOptions)
-// }
+	// 音声合成する
+	synOptions := core.MakeDefaultSynthesisOotions()
+	result, err := core.Synthesis(query, 1, synOptions)
+	if err != nil {
+		t.Fatal(err)
+	}
+	isWavFile(t, result)
+}
+
+func isWavFile(t *testing.T, bin []byte) {
+	t.Helper()
+
+	WAV_MAGICNUMBER_FIRST := []byte{0x52, 0x49, 0x46, 0x46}
+	WAV_MAGICNUMBER_SECOND := []byte{0x57, 0x41, 0x56, 0x45}
+
+	t.Log("assert MagicNumber")
+	assert.Equal(t, WAV_MAGICNUMBER_FIRST, bin[:4])
+	assert.Equal(t, WAV_MAGICNUMBER_SECOND, bin[8:12])
+}
 
 func setupCore() voicevoxcorego.VoicevoxCore {
 	core := voicevoxcorego.NewVoicevoxCore()
