@@ -98,30 +98,35 @@ func (r *VoicevoxCore) Synthesis(
 	return
 }
 
+// `Initialize()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultInitializeOptions() VoicevoxInitializeOptions {
 	raw := r.voicevoxMakeDefaultInitializeOptions()
 	return VoicevoxInitializeOptions{Raw: &raw}
 }
 
+// `Tts()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultTtsOotions() VoicevoxTtsOptions {
 	raw := r.voicevoxMakeDefaultTtsOptions()
 	return VoicevoxTtsOptions{Raw: &raw}
 }
 
+// `AudioQuery()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultAudioQueryOotions() VoicevoxAudioQueryOptions {
 	raw := r.voicevoxMakeDefaultAudioQueryOptions()
 	return VoicevoxAudioQueryOptions{Raw: &raw}
 }
 
+// `Synthesis()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultSynthesisOotions() VoicevoxSynthesisOptions {
 	raw := r.voicevoxMakeDefaultSynthesisOptions()
 	return VoicevoxSynthesisOptions{Raw: &raw}
 }
 
-func (r *VoicevoxCore) MakeDefaultAccentPhrasesOptions() {
+// func (r *VoicevoxCore) MakeDefaultAccentPhrasesOptions() {
 
-}
+// }
 
+// オーディオクエリを発行する
 func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) string {
 	ctext := C.CString(text)
 	cSpeakerID := C.uint(speakerID)
@@ -137,10 +142,12 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 	return audioQueryJson
 }
 
+// ファイナライズ
 func (r *VoicevoxCore) Finalize() {
 	r.voicevoxFinalize()
 }
 
+// ErrorResultCode をメッセージに変換する
 func (r *VoicevoxCore) ErrorResultToMessage(resultCode int) string {
 	cResultCode := C.int(resultCode)
 	retValue := r.voicevoxErrorResultToMessage(cResultCode)
@@ -148,30 +155,35 @@ func (r *VoicevoxCore) ErrorResultToMessage(resultCode int) string {
 	return C.GoString(retValue)
 }
 
+// メタ情報のjsonを取得する
 func (r *VoicevoxCore) GetMetasJson() string {
 	cResult := r.voicevoxGetMetasJson()
 
 	return C.GoString(cResult)
 }
 
+// サポートしているデバイス一覧のjsonを取得する
 func (r *VoicevoxCore) GetSupportedDevicesJson() string {
 	cResult := r.voicevoxGetSupportedDevicesJson()
 
 	return C.GoString(cResult)
 }
 
+// Coreのバージョンを取得する
 func (r *VoicevoxCore) GetCoreVersion() string {
 	cResult := r.voicevoxGetVersion()
 
 	return C.GoString(cResult)
 }
 
+// Gpuモードが有効になっているか確認する
 func (r *VoicevoxCore) IsGpuMode() bool {
 	cResult := r.voicevoxIsGpuMode()
 
 	return bool(cResult)
 }
 
+// モデルがロードされているか確認する
 func (r *VoicevoxCore) IsModelLoaded(speakerID uint) bool {
 	cSpeakerID := C.uint(speakerID)
 	cResult := r.voicevoxIsModelLoaded(cSpeakerID)
