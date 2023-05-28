@@ -13,6 +13,7 @@ func TestMain(m *testing.M) {
 	os.Exit(status)
 }
 
+// Ttsの実行を確認するテスト
 // nolint:errcheck
 func TestTts(t *testing.T) {
 	t.Log("initialize")
@@ -36,6 +37,7 @@ func TestTts(t *testing.T) {
 	isWavFile(t, result)
 }
 
+// オーディオクエリを発行し、音声合成を行うテスト
 // nolint:errcheck
 func TestSynthesis(t *testing.T) {
 	t.Log("Run AudioQuery()")
