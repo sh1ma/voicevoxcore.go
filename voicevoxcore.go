@@ -197,6 +197,7 @@ func (r *VoicevoxCore) IsModelLoaded(speakerID uint) bool {
 	return bool(cResult)
 }
 
+// 音素長を取得
 func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []float32 {
 
 	length := len(phonemeVector)
@@ -222,6 +223,7 @@ func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []f
 	return retValue
 }
 
+// 音高を取得
 func (r *VoicevoxCore) PredictIntonation(
 	speakerID int,
 	vowelPhonemeVector, consonantPhonemeVector []int64,
@@ -281,6 +283,7 @@ func (r *VoicevoxCore) PredictIntonation(
 	return retValue, nil
 }
 
+// phnemeVectorを元にデコードする
 func (r *VoicevoxCore) Decode(speakerID uint, phonemeSize int, f0 []float32, phonemeVector []float32) ([]float32, error) {
 	length := len(f0)
 
