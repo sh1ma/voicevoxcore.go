@@ -3,6 +3,7 @@ package voicevoxcorego
 // #include <stdint.h>
 import "C"
 import (
+	"encoding/json"
 	"errors"
 	"unsafe"
 )
@@ -69,6 +70,7 @@ func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOption
 
 // Audio Queryを基に音声合成を実行する関数。実行結果はwavファイルフォーマットのバイト列。
 // Sample: https://github.com/sh1ma/sample-synthesis
+// TODO: AudioQueryの文字列ではなくAudioQueryを受け取る形にする
 func (r *VoicevoxCore) Synthesis(
 	audioQuery string,
 	speakerID int,
@@ -127,7 +129,7 @@ func (r *VoicevoxCore) MakeDefaultSynthesisOotions() VoicevoxSynthesisOptions {
 // }
 
 // オーディオクエリを発行する
-func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) string {
+func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) (AudioQuery, error) {
 	ctext := C.CString(text)
 	cSpeakerID := C.uint(speakerID)
 
@@ -137,9 +139,13 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 
 	r.voicevoxAudioQuery(ctext, cSpeakerID, *options.Raw, datap)
 
-	audioQueryJson := C.GoString(*datap)
+	audioQueryJsonBytes := []byte(C.GoString(*datap))
+	var audioQuery AudioQuery
+	if err := json.Unmarshal(audioQueryJsonBytes, &audioQuery); err != nil {
+		return AudioQuery{}, err
+	}
 
-	return audioQueryJson
+	return audioQuery, nil
 }
 
 // ファイナライズ
