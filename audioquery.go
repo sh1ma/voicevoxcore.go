@@ -10,7 +10,7 @@ type (
 		PrePhonemeLength   float32         `json:"pre_phoneme_length"`
 		PostPhonemeLength  float32         `json:"float32"`
 		OutputSamplingRate float32         `json:"output_sampling_rate"`
-		OutputStereo       float32         `json:"output_stereo"`
+		OutputStereo       bool            `json:"output_stereo"`
 		Kana               string          `json:"kana"`
 	}
 
