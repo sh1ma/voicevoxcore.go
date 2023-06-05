@@ -10,6 +10,8 @@ import (
 
 func main() {
 
+	// 以下を参考にしたテスト
+	// ref:https://github.com/VOICEVOX/voicevox_core/blob/f32cafd1c18337abd6467de61944281eda54b73b/crates/voicevox_core/src/publish.rs#L922
 	var (
 		F0_LENGTH    int = 69
 		PHONEME_SIZE int = 45

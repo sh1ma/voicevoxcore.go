@@ -1,6 +1,7 @@
 package voicevoxcorego_test
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 
@@ -13,6 +14,7 @@ func TestMain(m *testing.M) {
 	os.Exit(status)
 }
 
+// Ttsの実行を確認するテスト
 // nolint:errcheck
 func TestTts(t *testing.T) {
 	t.Log("initialize")
@@ -36,6 +38,7 @@ func TestTts(t *testing.T) {
 	isWavFile(t, result)
 }
 
+// オーディオクエリを発行し、音声合成を行うテスト
 // nolint:errcheck
 func TestSynthesis(t *testing.T) {
 	t.Log("Run AudioQuery()")
@@ -51,11 +54,12 @@ func TestSynthesis(t *testing.T) {
 
 	// AudioQueryを生成
 	aqOptions := core.MakeDefaultAudioQueryOotions()
-	query := core.AudioQuery("テストなのだね", 1, aqOptions)
-
+	query, _ := core.AudioQuery("テストなのだね", 1, aqOptions)
+	queryJson, _ := json.Marshal(query)
+	t.Log(string(queryJson))
 	// 音声合成する
 	synOptions := core.MakeDefaultSynthesisOotions()
-	result, err := core.Synthesis(query, 1, synOptions)
+	result, err := core.Synthesis(string(queryJson), 1, synOptions)
 	if err != nil {
 		t.Fatal(err)
 	}

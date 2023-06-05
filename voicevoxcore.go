@@ -3,6 +3,7 @@ package voicevoxcorego
 // #include <stdint.h>
 import "C"
 import (
+	"encoding/json"
 	"errors"
 	"unsafe"
 )
@@ -69,6 +70,7 @@ func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOption
 
 // Audio Queryを基に音声合成を実行する関数。実行結果はwavファイルフォーマットのバイト列。
 // Sample: https://github.com/sh1ma/sample-synthesis
+// TODO: AudioQueryの文字列ではなくAudioQueryを受け取る形にする
 func (r *VoicevoxCore) Synthesis(
 	audioQuery string,
 	speakerID int,
@@ -98,31 +100,36 @@ func (r *VoicevoxCore) Synthesis(
 	return
 }
 
+// `Initialize()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultInitializeOptions() VoicevoxInitializeOptions {
 	raw := r.voicevoxMakeDefaultInitializeOptions()
 	return VoicevoxInitializeOptions{Raw: &raw}
 }
 
+// `Tts()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultTtsOotions() VoicevoxTtsOptions {
 	raw := r.voicevoxMakeDefaultTtsOptions()
 	return VoicevoxTtsOptions{Raw: &raw}
 }
 
+// `AudioQuery()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultAudioQueryOotions() VoicevoxAudioQueryOptions {
 	raw := r.voicevoxMakeDefaultAudioQueryOptions()
 	return VoicevoxAudioQueryOptions{Raw: &raw}
 }
 
+// `Synthesis()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultSynthesisOotions() VoicevoxSynthesisOptions {
 	raw := r.voicevoxMakeDefaultSynthesisOptions()
 	return VoicevoxSynthesisOptions{Raw: &raw}
 }
 
-func (r *VoicevoxCore) MakeDefaultAccentPhrasesOptions() {
+// func (r *VoicevoxCore) MakeDefaultAccentPhrasesOptions() {
 
-}
+// }
 
-func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) string {
+// オーディオクエリを発行する
+func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) (AudioQuery, error) {
 	ctext := C.CString(text)
 	cSpeakerID := C.uint(speakerID)
 
@@ -132,15 +139,21 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 
 	r.voicevoxAudioQuery(ctext, cSpeakerID, *options.Raw, datap)
 
-	audioQueryJson := C.GoString(*datap)
+	audioQueryJsonBytes := []byte(C.GoString(*datap))
+	var audioQuery AudioQuery
+	if err := json.Unmarshal(audioQueryJsonBytes, &audioQuery); err != nil {
+		return AudioQuery{}, err
+	}
 
-	return audioQueryJson
+	return audioQuery, nil
 }
 
+// ファイナライズ
 func (r *VoicevoxCore) Finalize() {
 	r.voicevoxFinalize()
 }
 
+// ErrorResultCode をメッセージに変換する
 func (r *VoicevoxCore) ErrorResultToMessage(resultCode int) string {
 	cResultCode := C.int(resultCode)
 	retValue := r.voicevoxErrorResultToMessage(cResultCode)
@@ -148,30 +161,35 @@ func (r *VoicevoxCore) ErrorResultToMessage(resultCode int) string {
 	return C.GoString(retValue)
 }
 
+// メタ情報のjsonを取得する
 func (r *VoicevoxCore) GetMetasJson() string {
 	cResult := r.voicevoxGetMetasJson()
 
 	return C.GoString(cResult)
 }
 
+// サポートしているデバイス一覧のjsonを取得する
 func (r *VoicevoxCore) GetSupportedDevicesJson() string {
 	cResult := r.voicevoxGetSupportedDevicesJson()
 
 	return C.GoString(cResult)
 }
 
+// Coreのバージョンを取得する
 func (r *VoicevoxCore) GetCoreVersion() string {
 	cResult := r.voicevoxGetVersion()
 
 	return C.GoString(cResult)
 }
 
+// Gpuモードが有効になっているか確認する
 func (r *VoicevoxCore) IsGpuMode() bool {
 	cResult := r.voicevoxIsGpuMode()
 
 	return bool(cResult)
 }
 
+// モデルがロードされているか確認する
 func (r *VoicevoxCore) IsModelLoaded(speakerID uint) bool {
 	cSpeakerID := C.uint(speakerID)
 	cResult := r.voicevoxIsModelLoaded(cSpeakerID)
@@ -179,6 +197,7 @@ func (r *VoicevoxCore) IsModelLoaded(speakerID uint) bool {
 	return bool(cResult)
 }
 
+// 音素長を取得
 func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []float32 {
 
 	length := len(phonemeVector)
@@ -204,6 +223,7 @@ func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []f
 	return retValue
 }
 
+// 音高を取得
 func (r *VoicevoxCore) PredictIntonation(
 	speakerID int,
 	vowelPhonemeVector, consonantPhonemeVector []int64,
@@ -263,6 +283,7 @@ func (r *VoicevoxCore) PredictIntonation(
 	return retValue, nil
 }
 
+// phnemeVectorを元にデコードする
 func (r *VoicevoxCore) Decode(speakerID uint, phonemeSize int, f0 []float32, phonemeVector []float32) ([]float32, error) {
 	length := len(f0)
 
