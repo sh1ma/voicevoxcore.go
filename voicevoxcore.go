@@ -47,14 +47,7 @@ func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOption
 	ctext := C.CString(text)
 	cspeakerID := C.uint(speakerID)
 
-	// TODO: このあたりを関数にまとめる
-	var size int
-	data := make([]*C.uchar, 1)
-	// NOTE: ここキャストする必要ない
-	datap := (**C.uchar)(&data[0])
-	defer r.voicevoxWavFree(*datap)
-
-	sizep := (*C.ulong)(unsafe.Pointer(&size))
+	datap, sizep, data, _ := makeDataReceiver[*C.uchar, C.ulong]()
 
 	code := r.voicevoxTts(ctext, cspeakerID, *options.Raw, sizep, datap)
 	if int(code) != 0 {
