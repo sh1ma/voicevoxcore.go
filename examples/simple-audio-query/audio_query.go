@@ -18,17 +18,20 @@ func main() {
 	text := os.Args[1]
 
 	core := voicevoxcorego.NewVoicevoxCore()
+
 	initializeOptions := voicevoxcorego.NewVoicevoxInitializeOptions(0, 0, false, "./open_jtalk_dic_utf_8-1.11")
 	err := core.Initialize(initializeOptions)
 	defer core.Finalize()
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	err = core.LoadModel(1)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	audioQueryOptions := voicevoxcorego.NewVoicevoxAudioQueryOptions(false)
-	result := core.AudioQuery(text, 1, audioQueryOptions)
+	result, _ := core.AudioQuery(text, 1, audioQueryOptions)
 	fmt.Println(result)
 }

@@ -16,7 +16,7 @@ func main() {
 		fmt.Println("usage:\n\tgo run audio_predict_duration.go [phoneme_id1, phoneme_id2, phoneme_id3, ...]")
 		os.Exit(127)
 	}
-	rawPhonemeIDs := os.Args[2:]
+	rawPhonemeIDs := os.Args[1:]
 
 	var phonemes []int64
 
@@ -47,7 +47,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	retValue := core.PredictDuration(1, phonemes)
+	retValue, _ := core.PredictDuration(1, phonemes)
 	for _, v := range retValue {
 		println(fmt.Sprintf("%f", v))
 	}
