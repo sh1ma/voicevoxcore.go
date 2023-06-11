@@ -188,10 +188,8 @@ func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []f
 
 	length := len(phonemeVector)
 
-	var size uint32
-	data := make([]*C.float, 1)
-	datap := &data[0]
-	sizep := (*C.ulong)(unsafe.Pointer(&size))
+	datap, sizep, data, _ := makeDataReceiver[*C.float, C.ulong]()
+
 	cPhonemeVectoTmp := &phonemeVector[0]
 	cPhonemeVectorPtr := (*C.int64_t)(cPhonemeVectoTmp)
 	phonemeVectorLength := (C.ulong)(length)
