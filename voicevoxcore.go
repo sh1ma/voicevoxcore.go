@@ -47,14 +47,7 @@ func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOption
 	ctext := C.CString(text)
 	cspeakerID := C.uint(speakerID)
 
-	// TODO: このあたりを関数にまとめる
-	var size int
-	data := make([]*C.uchar, 1)
-	// NOTE: ここキャストする必要ない
-	datap := (**C.uchar)(&data[0])
-	defer r.voicevoxWavFree(*datap)
-
-	sizep := (*C.ulong)(unsafe.Pointer(&size))
+	datap, sizep, data, _ := makeDataReceiver[*C.uchar, C.ulong]()
 
 	code := r.voicevoxTts(ctext, cspeakerID, *options.Raw, sizep, datap)
 	if int(code) != 0 {
@@ -79,14 +72,7 @@ func (r *VoicevoxCore) Synthesis(
 	ctext := C.CString(audioQuery)
 	cspeakerID := C.uint(speakerID)
 
-	// HACK: 煩雑なコード。Tts()のTODOと一緒の関数にまとめる
-	var size int
-	data := make([]*C.uchar, 1)
-	// NOTE: ここキャストする必要ない
-	datap := (**C.uchar)(&data[0])
-	defer r.voicevoxWavFree(*datap)
-
-	sizep := (*C.ulong)(unsafe.Pointer(&size))
+	datap, sizep, data, _ := makeDataReceiver[*C.uchar, C.ulong]()
 
 	code := r.voicevoxSynthesis(ctext, cspeakerID, *options.Raw, sizep, datap)
 	if int(code) != 0 {
@@ -202,10 +188,8 @@ func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []f
 
 	length := len(phonemeVector)
 
-	var size uint32
-	data := make([]*C.float, 1)
-	datap := &data[0]
-	sizep := (*C.ulong)(unsafe.Pointer(&size))
+	datap, sizep, data, _ := makeDataReceiver[*C.float, C.ulong]()
+
 	cPhonemeVectoTmp := &phonemeVector[0]
 	cPhonemeVectorPtr := (*C.int64_t)(cPhonemeVectoTmp)
 	phonemeVectorLength := (C.ulong)(length)
