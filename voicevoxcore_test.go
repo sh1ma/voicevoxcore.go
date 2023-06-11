@@ -90,7 +90,7 @@ func TestPredictDuration(t *testing.T) {
 		}
 	}
 
-	duration := core.PredictDuration(1, phonemes)
+	duration, _ := core.PredictDuration(1, phonemes)
 	assert.Equal(t, len(phonemes), len(duration))
 
 }

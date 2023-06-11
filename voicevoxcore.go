@@ -4,8 +4,9 @@ package voicevoxcorego
 import "C"
 import (
 	"encoding/json"
-	"errors"
 	"unsafe"
+
+	"golang.org/x/xerrors"
 )
 
 // VoicevoxCore is top-level API Wrapper instance
@@ -21,69 +22,81 @@ func NewVoicevoxCore() (core VoicevoxCore) {
 }
 
 // C APIを通じてVoicevox_coreを初期化する関数
-func (r *VoicevoxCore) Initialize(options VoicevoxInitializeOptions) (err error) {
+func (r *VoicevoxCore) Initialize(options VoicevoxInitializeOptions) error {
 	if r.initialized {
-		err = errors.New("Already initialized")
-		return
+		err := xerrors.Errorf("Already initialized")
+		return err
 	}
-	r.voicevoxInitialize(*options.Raw)
+	code := r.voicevoxInitialize(*options.Raw)
+	if code != 0 {
+		err := r.raiseError(code)
+		return err
+	}
 	r.initialized = true
-	return
+	return nil
 }
 
 // 音声合成モデルをロードする関数
-func (r *VoicevoxCore) LoadModel(speakerID int) (err error) {
+func (r *VoicevoxCore) LoadModel(speakerID int) error {
 	id := C.uint(speakerID)
 	code := r.voicevoxLoadModel(id)
-	if int(code) != 0 {
-		err = errors.New("Model load Failed")
+	if code != 0 {
+		err := r.raiseError(code)
+		return err
 	}
-	return
+	return nil
 }
 
-// Text to Speechを実行する関数。実行結果はwavファイルフォーマットのバイト列。
-// Sample: https://github.com/sh1ma/sample-tts
-func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOptions) (slicebytes []byte, err error) {
+/*
+Text to Speechを実行する関数。実行結果はwavファイルフォーマットのバイト列。
+
+Sample: https://github.com/sh1ma/sample-tts
+*/
+func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOptions) ([]byte, error) {
 	ctext := C.CString(text)
 	cspeakerID := C.uint(speakerID)
 
 	datap, sizep, data, _ := makeDataReceiver[*C.uchar, C.ulong]()
 
+	defer r.voicevoxWavFree(*datap)
 	code := r.voicevoxTts(ctext, cspeakerID, *options.Raw, sizep, datap)
-	if int(code) != 0 {
-		err = errors.New("Failed TTS")
-		return
+	if code != 0 {
+		err := r.raiseError(code)
+		return nil, err
 	}
 
 	slice := unsafe.Slice(data[0], *sizep)
 	sliceUnsafe := unsafe.SliceData(slice)
-	slicebytes = C.GoBytes(unsafe.Pointer(sliceUnsafe), C.int((len(slice))))
-	return
+	slicebytes := C.GoBytes(unsafe.Pointer(sliceUnsafe), C.int((len(slice))))
+	return slicebytes, nil
 }
 
-// Audio Queryを基に音声合成を実行する関数。実行結果はwavファイルフォーマットのバイト列。
-// Sample: https://github.com/sh1ma/sample-synthesis
-// TODO: AudioQueryの文字列ではなくAudioQueryを受け取る形にする
+/*
+Audio Queryを基に音声合成を実行する関数。実行結果はwavファイルフォーマットのバイト列。
+
+Sample: https://github.com/sh1ma/sample-synthesis
+*/
 func (r *VoicevoxCore) Synthesis(
 	audioQuery string,
 	speakerID int,
 	options VoicevoxSynthesisOptions,
-) (slicebytes []byte, err error) {
+) ([]byte, error) {
 	ctext := C.CString(audioQuery)
 	cspeakerID := C.uint(speakerID)
 
 	datap, sizep, data, _ := makeDataReceiver[*C.uchar, C.ulong]()
 
+	defer r.voicevoxWavFree(*datap)
 	code := r.voicevoxSynthesis(ctext, cspeakerID, *options.Raw, sizep, datap)
 	if int(code) != 0 {
-		err = errors.New("Failed TTS")
-		return
+		err := r.raiseError(code)
+		return nil, err
 	}
 
 	slice := unsafe.Slice(data[0], *sizep)
 	sliceUnsafe := unsafe.SliceData(slice)
-	slicebytes = C.GoBytes(unsafe.Pointer(sliceUnsafe), C.int((len(slice))))
-	return
+	slicebytes := C.GoBytes(unsafe.Pointer(sliceUnsafe), C.int((len(slice))))
+	return slicebytes, nil
 }
 
 // `Initialize()` のデフォルトオプションを生成する
@@ -110,10 +123,6 @@ func (r *VoicevoxCore) MakeDefaultSynthesisOotions() VoicevoxSynthesisOptions {
 	return VoicevoxSynthesisOptions{Raw: &raw}
 }
 
-// func (r *VoicevoxCore) MakeDefaultAccentPhrasesOptions() {
-
-// }
-
 // オーディオクエリを発行する
 func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) (AudioQuery, error) {
 	ctext := C.CString(text)
@@ -123,7 +132,11 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 	datap := &data[0]
 	defer r.voicevoxAudioQueryJsonFree(*datap)
 
-	r.voicevoxAudioQuery(ctext, cSpeakerID, *options.Raw, datap)
+	code := r.voicevoxAudioQuery(ctext, cSpeakerID, *options.Raw, datap)
+	if code != 0 {
+		err := r.raiseError(code)
+		return AudioQuery{}, err
+	}
 
 	audioQueryJsonBytes := []byte(C.GoString(*datap))
 	var audioQuery AudioQuery
@@ -137,14 +150,6 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 // ファイナライズ
 func (r *VoicevoxCore) Finalize() {
 	r.voicevoxFinalize()
-}
-
-// ErrorResultCode をメッセージに変換する
-func (r *VoicevoxCore) ErrorResultToMessage(resultCode int) string {
-	cResultCode := C.int(resultCode)
-	retValue := r.voicevoxErrorResultToMessage(cResultCode)
-
-	return C.GoString(retValue)
 }
 
 // メタ情報のjsonを取得する
@@ -184,7 +189,7 @@ func (r *VoicevoxCore) IsModelLoaded(speakerID uint) bool {
 }
 
 // 音素長を取得
-func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []float32 {
+func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) ([]float32, error) {
 
 	length := len(phonemeVector)
 
@@ -192,9 +197,15 @@ func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []f
 
 	cPhonemeVectoTmp := &phonemeVector[0]
 	cPhonemeVectorPtr := (*C.int64_t)(cPhonemeVectoTmp)
-	phonemeVectorLength := (C.ulong)(length)
-	r.voicevoxPredictDuration(phonemeVectorLength, cPhonemeVectorPtr, C.uint(speakerID), sizep, datap)
+	cPhonemeVectorLength := (C.ulong)(length)
+
 	defer r.voicevoxPredictDurationDataFree(*datap)
+	code := r.voicevoxPredictDuration(cPhonemeVectorLength, cPhonemeVectorPtr, C.uint(speakerID), sizep, datap)
+
+	if code != 0 {
+		err := r.raiseError(code)
+		return nil, err
+	}
 
 	slice := unsafe.Slice(data[0], *sizep)
 
@@ -204,7 +215,7 @@ func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) []f
 		retValue[i] = float32(v)
 	}
 
-	return retValue
+	return retValue, nil
 }
 
 // 音高を取得
@@ -224,17 +235,18 @@ func (r *VoicevoxCore) PredictIntonation(
 	}
 	for _, l := range otherLengths {
 		if length != l {
-			return nil, errors.New("全てのベクター変数は同じ長さでなければなりません。")
+			return nil, xerrors.Errorf("%+w", "全てのベクター変数は同じ長さでなければなりません。")
 		}
 	}
 
+	// Cの関数に渡す引数を用意する
 	cLength := C.ulong(length)
 	cSpeakerID := C.uint(speakerID)
 
-	// []int64を[]C.int64に変換する関数
+	// []int64を[]C.int64に変換する関数を用意する
 	int64ToCtype := sliceToCtype[int64, C.int64_t]
 
-	// それぞれのVectorに `int64ToCtype` を適用する
+	// それぞれのVectorに上述の　`int64ToCtype` を適用する
 	cVowelPhonemeVector := int64ToCtype(vowelPhonemeVector)
 	cConsonantPhonemeVecor := int64ToCtype(consonantPhonemeVector)
 	cStartAccentVector := int64ToCtype(startAccentPhraseVector)
@@ -247,7 +259,7 @@ func (r *VoicevoxCore) PredictIntonation(
 
 	defer r.voicevoxPredictIntonationDataFree(*datap)
 
-	r.voicevoxPredictIntonation(
+	code := r.voicevoxPredictIntonation(
 		cLength,
 		&cVowelPhonemeVector, &cConsonantPhonemeVecor,
 		&cStartAccentVector, &cEndAccentVector,
@@ -255,6 +267,10 @@ func (r *VoicevoxCore) PredictIntonation(
 		cSpeakerID,
 		sizep, datap,
 	)
+	if code != 0 {
+		err := r.raiseError(code)
+		return nil, err
+	}
 
 	slice := unsafe.Slice(data[0], *sizep)
 
@@ -283,7 +299,11 @@ func (r *VoicevoxCore) Decode(speakerID uint, phonemeSize int, f0 []float32, pho
 
 	defer r.voicevoxDecodeDataFree(*datap)
 
-	r.voicevoxDecode(cLength, cPhonemeSize, &cF0, &cPhonemeVector, cSpeakerID, sizep, datap)
+	code := r.voicevoxDecode(cLength, cPhonemeSize, &cF0, &cPhonemeVector, cSpeakerID, sizep, datap)
+	if code != 0 {
+		err := r.raiseError(code)
+		return nil, err
+	}
 
 	slice := unsafe.Slice(data[0], *sizep)
 
@@ -294,4 +314,25 @@ func (r *VoicevoxCore) Decode(speakerID uint, phonemeSize int, f0 []float32, pho
 	}
 
 	return retValue, nil
+}
+
+// ErrorResultCode をメッセージに変換する
+func (r *VoicevoxCore) ErrorResultToMessage(resultCode int) string {
+	cResultCode := C.int(resultCode)
+	retValue := r.voicevoxErrorResultToMessage(cResultCode)
+
+	return C.GoString(retValue)
+}
+
+func (r *VoicevoxCore) raiseError(resultCode C.int) error {
+	message := r.errorResultToMessageInternal(resultCode)
+	err := xerrors.Errorf("%+w", xerrors.New(message))
+
+	return err
+}
+
+func (r *VoicevoxCore) errorResultToMessageInternal(resultCode C.int) string {
+	message := C.GoString(r.voicevoxErrorResultToMessage(resultCode))
+
+	return message
 }
