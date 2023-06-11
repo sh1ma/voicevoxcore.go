@@ -72,14 +72,7 @@ func (r *VoicevoxCore) Synthesis(
 	ctext := C.CString(audioQuery)
 	cspeakerID := C.uint(speakerID)
 
-	// HACK: 煩雑なコード。Tts()のTODOと一緒の関数にまとめる
-	var size int
-	data := make([]*C.uchar, 1)
-	// NOTE: ここキャストする必要ない
-	datap := (**C.uchar)(&data[0])
-	defer r.voicevoxWavFree(*datap)
-
-	sizep := (*C.ulong)(unsafe.Pointer(&size))
+	datap, sizep, data, _ := makeDataReceiver[*C.uchar, C.ulong]()
 
 	code := r.voicevoxSynthesis(ctext, cspeakerID, *options.Raw, sizep, datap)
 	if int(code) != 0 {
