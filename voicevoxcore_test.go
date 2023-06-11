@@ -41,8 +41,6 @@ func TestTts(t *testing.T) {
 // オーディオクエリを発行し、音声合成を行うテスト
 // nolint:errcheck
 func TestSynthesis(t *testing.T) {
-	t.Log("Run AudioQuery()")
-
 	t.Log("initialize")
 	core := setupCore()
 	defer core.Finalize()
@@ -66,6 +64,45 @@ func TestSynthesis(t *testing.T) {
 	isWavFile(t, result)
 }
 
+// nolint:errcheck
+func TestPredictDuration(t *testing.T) {
+	t.Log("initialize")
+	core := setupCore()
+	defer core.Finalize()
+	t.Log("initialize done")
+
+	t.Log("load model")
+	core.LoadModel(1)
+	t.Log("load model done")
+
+	// AudioQueryを生成
+	aqOptions := core.MakeDefaultAudioQueryOotions()
+	query, _ := core.AudioQuery("テストなのだね", 1, aqOptions)
+	accentPhrases := query.AccentPharases
+	var phonemes []int64
+	for _, ap := range accentPhrases {
+		moras := ap.Moras
+		for _, m := range moras {
+			if m.Consonant != "" {
+				phonemes = append(phonemes, int64(phonemeIndexOf(m.Consonant)))
+			}
+			phonemes = append(phonemes, int64(phonemeIndexOf(m.Vowel)))
+		}
+	}
+
+	duration := core.PredictDuration(1, phonemes)
+	assert.Equal(t, len(phonemes), len(duration))
+
+}
+
+func setupCore() voicevoxcorego.VoicevoxCore {
+	core := voicevoxcorego.NewVoicevoxCore()
+	initOptions := voicevoxcorego.NewVoicevoxInitializeOptions(0, 0, false, "./open_jtalk_dic_utf_8-1.11")
+	core.Initialize(initOptions) //nolint:errcheck
+
+	return core
+}
+
 func isWavFile(t *testing.T, bin []byte) {
 	t.Helper()
 
@@ -77,10 +114,59 @@ func isWavFile(t *testing.T, bin []byte) {
 	assert.Equal(t, WAV_MAGICNUMBER_SECOND, bin[8:12])
 }
 
-func setupCore() voicevoxcorego.VoicevoxCore {
-	core := voicevoxcorego.NewVoicevoxCore()
-	initOptions := voicevoxcorego.NewVoicevoxInitializeOptions(0, 0, false, "./open_jtalk_dic_utf_8-1.11")
-	core.Initialize(initOptions) //nolint:errcheck
+func phonemeIndexOf(phoneme string) int {
+	for i, v := range PHONEME {
+		if phoneme == v {
+			return i
+		}
+	}
+	return -1
+}
 
-	return core
+var PHONEME []string = []string{
+	"pau",
+	"A",
+	"E",
+	"I",
+	"N",
+	"O",
+	"U",
+	"a",
+	"b",
+	"by",
+	"ch",
+	"cl",
+	"d",
+	"dy",
+	"e",
+	"f",
+	"g",
+	"gw",
+	"gy",
+	"h",
+	"hy",
+	"i",
+	"j",
+	"k",
+	"kw",
+	"ky",
+	"m",
+	"my",
+	"n",
+	"ny",
+	"o",
+	"p",
+	"py",
+	"r",
+	"ry",
+	"s",
+	"sh",
+	"t",
+	"ts",
+	"ty",
+	"u",
+	"v",
+	"w",
+	"y",
+	"z",
 }
