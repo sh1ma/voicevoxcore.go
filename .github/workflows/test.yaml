@@ -33,7 +33,7 @@ jobs:
 
       - name: Execute Test
         run: |
-          wgo test -race -coverprofile=coverage.txt -covermode=atomic
+          go test -race -coverprofile=coverage.txt -covermode=atomic
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:
