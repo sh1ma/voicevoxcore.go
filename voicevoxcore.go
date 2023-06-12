@@ -37,7 +37,7 @@ func (r *VoicevoxCore) Initialize(options VoicevoxInitializeOptions) error {
 }
 
 // 音声合成モデルをロードする関数
-func (r *VoicevoxCore) LoadModel(speakerID int) error {
+func (r *VoicevoxCore) LoadModel(speakerID uint) error {
 	id := C.uint(speakerID)
 	code := r.voicevoxLoadModel(id)
 	if code != 0 {
@@ -319,9 +319,9 @@ func (r *VoicevoxCore) Decode(speakerID uint, phonemeSize int, f0 []float32, pho
 // ErrorResultCode をメッセージに変換する
 func (r *VoicevoxCore) ErrorResultToMessage(resultCode int) string {
 	cResultCode := C.int(resultCode)
-	retValue := r.voicevoxErrorResultToMessage(cResultCode)
+	message := r.errorResultToMessageInternal(cResultCode)
 
-	return C.GoString(retValue)
+	return message
 }
 
 func (r *VoicevoxCore) raiseError(resultCode C.int) error {
