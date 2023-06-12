@@ -3,6 +3,7 @@ package voicevoxcorego_test
 import (
 	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 
 	voicevoxcorego "github.com/sh1ma/voicevoxcore.go"
@@ -12,6 +13,30 @@ import (
 func TestMain(m *testing.M) {
 	status := m.Run()
 	os.Exit(status)
+}
+
+func TestLoadModelAndIsModelLoaded(t *testing.T) {
+	t.Log("initialize")
+	core := setupCore()
+	defer core.Finalize()
+	t.Log("initialize done")
+
+	t.Log("assert return false when model is not loaded")
+	assert.Equal(t, core.IsModelLoaded(1), false)
+	if err := core.LoadModel(1); err != nil {
+		t.Fatal(err)
+		return
+	}
+	assert.Equal(t, core.IsModelLoaded(1), true)
+
+	t.Log("assert error when model id is invalid")
+	assert.Equal(t, core.IsModelLoaded(9999), false)
+	err := core.LoadModel(9999)
+	if assert.Error(t, err) {
+		assert.NotEqual(t, strings.Contains(err.Error(), "無効なspeaker_idです"), false)
+		return
+	}
+	t.Fatal("error is not occurred")
 }
 
 // Ttsの実行を確認するテスト
