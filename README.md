@@ -1,5 +1,6 @@
 # voicevoxcore.go
 
+[![codecov](https://codecov.io/gh/sh1ma/voicevoxcore.go/branch/main/graph/badge.svg?token=5111EKB6SF)](https://codecov.io/gh/sh1ma/voicevoxcore.go)
 [![CI: Test](https://github.com/sh1ma/voicevoxcore.go/actions/workflows/test.yaml/badge.svg)](https://github.com/sh1ma/voicevoxcore.go/actions/workflows/test.yaml)
 [![golangci-lint](https://github.com/sh1ma/voicevoxcore.go/actions/workflows/lint.yaml/badge.svg)](https://github.com/sh1ma/voicevoxcore.go/actions/workflows/lint.yaml)
 
