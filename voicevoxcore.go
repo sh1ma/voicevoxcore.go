@@ -3,7 +3,6 @@ package voicevoxcorego
 // #include <stdint.h>
 import "C"
 import (
-	"encoding/json"
 	"unsafe"
 
 	"golang.org/x/xerrors"
@@ -77,11 +76,19 @@ Audio Queryを基に音声合成を実行する関数。実行結果はwavファ
 Sample: https://github.com/sh1ma/sample-synthesis
 */
 func (r *VoicevoxCore) Synthesis(
-	audioQuery string,
+	audioQuery AudioQuery,
 	speakerID int,
 	options VoicevoxSynthesisOptions,
 ) ([]byte, error) {
-	ctext := C.CString(audioQuery)
+
+	// クエリの構造体をJSON文字列に変換する
+	queryString, err := audioQuery.ToJsonString()
+	if err != nil {
+		return nil, err
+	}
+
+	// 各引数をCの型に変換する
+	ctext := C.CString(queryString)
 	cspeakerID := C.uint(speakerID)
 
 	datap, sizep, data, _ := makeDataReceiver[*C.uchar, C.ulong]()
@@ -128,6 +135,7 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 	ctext := C.CString(text)
 	cSpeakerID := C.uint(speakerID)
 
+	// TODO: 関数に切り出す
 	data := make([]*C.char, 1)
 	datap := &data[0]
 	defer r.voicevoxAudioQueryJsonFree(*datap)
@@ -138,9 +146,10 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 		return AudioQuery{}, err
 	}
 
-	audioQueryJsonBytes := []byte(C.GoString(*datap))
-	var audioQuery AudioQuery
-	if err := json.Unmarshal(audioQueryJsonBytes, &audioQuery); err != nil {
+	queryJsonBytes := []byte(C.GoString(*datap))
+
+	audioQuery, err := NewAudioQueryFromJson(queryJsonBytes)
+	if err != nil {
 		return AudioQuery{}, err
 	}
 
