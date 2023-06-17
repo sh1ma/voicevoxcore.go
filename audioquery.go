@@ -1,5 +1,7 @@
 package voicevoxcorego
 
+import "encoding/json"
+
 type (
 	AudioQuery struct {
 		AccentPharases     []AccentPharase `json:"accent_phrases"`
@@ -30,3 +32,24 @@ type (
 		Pitch           float32 `json:"pitch"`
 	}
 )
+
+func (q *AudioQuery) ToJson() ([]byte, error) {
+	return json.Marshal(q)
+}
+
+func (q *AudioQuery) ToJsonString() (string, error) {
+	jsonBytes, err := q.ToJson()
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBytes), nil
+}
+
+func NewAudioQueryFromJson(queryJson []byte) (AudioQuery, error) {
+	var query AudioQuery
+	err := json.Unmarshal(queryJson, &query)
+	if err != nil {
+		return AudioQuery{}, err
+	}
+	return query, nil
+}
