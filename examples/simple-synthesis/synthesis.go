@@ -18,9 +18,15 @@ func main() {
 	jsonPath := os.Args[1]
 
 	file, err := os.ReadFile(jsonPath)
-	audioQuery := string(file)
+	if err != nil {
+		fmt.Println("ファイル読み込みに失敗")
+		os.Exit(1)
+	}
+
+	audioQuery, err := voicevoxcorego.NewAudioQueryFromJson(file)
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	core := voicevoxcorego.NewVoicevoxCore()
