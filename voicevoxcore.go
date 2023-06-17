@@ -26,7 +26,7 @@ func (r *VoicevoxCore) Initialize(options VoicevoxInitializeOptions) error {
 		err := xerrors.Errorf("Already initialized")
 		return err
 	}
-	code := r.voicevoxInitialize(*options.Raw)
+	code := r.voicevoxInitialize(*options.raw)
 	if code != 0 {
 		err := r.raiseError(code)
 		return err
@@ -58,16 +58,14 @@ func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOption
 	datap, sizep, data, _ := makeDataReceiver[*C.uchar, C.ulong]()
 
 	defer r.voicevoxWavFree(*datap)
-	code := r.voicevoxTts(ctext, cspeakerID, *options.Raw, sizep, datap)
+	code := r.voicevoxTts(ctext, cspeakerID, *options.raw, sizep, datap)
 	if code != 0 {
 		err := r.raiseError(code)
 		return nil, err
 	}
 
-	slice := unsafe.Slice(data[0], *sizep)
-	sliceUnsafe := unsafe.SliceData(slice)
-	slicebytes := C.GoBytes(unsafe.Pointer(sliceUnsafe), C.int((len(slice))))
-	return slicebytes, nil
+	wav := r.getWavBin(data[0], sizep)
+	return wav, nil
 }
 
 /*
@@ -94,40 +92,46 @@ func (r *VoicevoxCore) Synthesis(
 	datap, sizep, data, _ := makeDataReceiver[*C.uchar, C.ulong]()
 
 	defer r.voicevoxWavFree(*datap)
-	code := r.voicevoxSynthesis(ctext, cspeakerID, *options.Raw, sizep, datap)
+	code := r.voicevoxSynthesis(ctext, cspeakerID, *options.raw, sizep, datap)
 	if int(code) != 0 {
 		err := r.raiseError(code)
 		return nil, err
 	}
 
-	slice := unsafe.Slice(data[0], *sizep)
+	wav := r.getWavBin(data[0], sizep)
+	return wav, nil
+}
+
+// Synthesis, Tts の共通処理。Waveファイルのバイト列を取得する
+func (r *VoicevoxCore) getWavBin(dataPointer *C.uchar, sizePointer *C.ulong) []byte {
+	slice := unsafe.Slice(dataPointer, *sizePointer)
 	sliceUnsafe := unsafe.SliceData(slice)
 	slicebytes := C.GoBytes(unsafe.Pointer(sliceUnsafe), C.int((len(slice))))
-	return slicebytes, nil
+	return slicebytes
 }
 
 // `Initialize()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultInitializeOptions() VoicevoxInitializeOptions {
 	raw := r.voicevoxMakeDefaultInitializeOptions()
-	return VoicevoxInitializeOptions{Raw: &raw}
+	return VoicevoxInitializeOptions{raw: &raw}
 }
 
 // `Tts()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultTtsOotions() VoicevoxTtsOptions {
 	raw := r.voicevoxMakeDefaultTtsOptions()
-	return VoicevoxTtsOptions{Raw: &raw}
+	return VoicevoxTtsOptions{raw: &raw}
 }
 
 // `AudioQuery()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultAudioQueryOotions() VoicevoxAudioQueryOptions {
 	raw := r.voicevoxMakeDefaultAudioQueryOptions()
-	return VoicevoxAudioQueryOptions{Raw: &raw}
+	return VoicevoxAudioQueryOptions{raw: &raw}
 }
 
 // `Synthesis()` のデフォルトオプションを生成する
 func (r *VoicevoxCore) MakeDefaultSynthesisOotions() VoicevoxSynthesisOptions {
 	raw := r.voicevoxMakeDefaultSynthesisOptions()
-	return VoicevoxSynthesisOptions{Raw: &raw}
+	return VoicevoxSynthesisOptions{raw: &raw}
 }
 
 // オーディオクエリを発行する
@@ -140,7 +144,7 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 	datap := &data[0]
 	defer r.voicevoxAudioQueryJsonFree(*datap)
 
-	code := r.voicevoxAudioQuery(ctext, cSpeakerID, *options.Raw, datap)
+	code := r.voicevoxAudioQuery(ctext, cSpeakerID, *options.raw, datap)
 	if code != 0 {
 		err := r.raiseError(code)
 		return AudioQuery{}, err
