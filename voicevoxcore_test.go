@@ -118,6 +118,43 @@ func TestPredictDuration(t *testing.T) {
 
 }
 
+// nolint:errcheck
+func TestGetMetasJson(t *testing.T) {
+	t.Log("initialize")
+	core := setupCore()
+	metas := core.GetMetasJson()
+	t.Log(metas)
+}
+
+func TestGetSupportedDevicesJson(t *testing.T) {
+	t.Log("initialize")
+	core := setupCore()
+	devices := core.GetSupportedDevicesJson()
+	t.Log(devices)
+}
+
+func TestGetCoreVersion(t *testing.T) {
+	t.Log("initialize")
+	core := setupCore()
+	version := core.GetCoreVersion()
+	t.Log(version)
+}
+
+func TestIsGpuMode(t *testing.T) {
+	t.Log("initialize")
+	core := setupCore()
+	t.Log(core.IsGpuMode())
+}
+
+// nolint:errcheck
+func TestIsModelLoaded(t *testing.T) {
+	t.Log("initialize")
+	core := setupCore()
+	assert.Equal(t, core.IsModelLoaded(1), false)
+	core.LoadModel(1)
+	assert.Equal(t, core.IsModelLoaded(1), true)
+}
+
 func setupCore() voicevoxcorego.VoicevoxCore {
 	core := voicevoxcorego.NewVoicevoxCore()
 	initOptions := voicevoxcorego.NewVoicevoxInitializeOptions(0, 0, false, "./open_jtalk_dic_utf_8-1.11")
