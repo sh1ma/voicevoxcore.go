@@ -192,7 +192,15 @@ func TestPredictIntonation(t *testing.T) {
 
 	f0, err := core.PredictIntonation(1, vowelPhonemeVector, consonantPhonemeVector, startAccentVector, endAccentVector, startAccentPharseVector, endAccentPharseVector)
 	if err != nil {
+		t.Logf("vowelPhonemeVector: %v", vowelPhonemeVector)
+		t.Logf("consonantPhonemeVector: %v", consonantPhonemeVector)
+		t.Logf("startAccentVector: %v", startAccentVector)
+		t.Logf("endAccentVector: %v", endAccentVector)
+		t.Logf("startAccentPharseVector: %v", startAccentPharseVector)
+		t.Logf("endAccentPharseVector: %v", endAccentPharseVector)
+
 		t.Fatal(err)
+
 	}
 
 	assert.Equal(t, length, len(f0))
