@@ -231,7 +231,7 @@ func (r *VoicevoxCore) PredictDuration(speakerID int, phonemeVector []int64) ([]
 	return retValue, nil
 }
 
-// 音高を取得
+// モーラごとのF0を推論する
 func (r *VoicevoxCore) PredictIntonation(
 	speakerID int,
 	vowelPhonemeVector, consonantPhonemeVector []int64,
