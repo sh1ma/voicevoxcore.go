@@ -117,6 +117,7 @@ func TestPredictDuration(t *testing.T) {
 	assert.Equal(t, len(phonemes), len(duration))
 }
 
+//nolint:errcheck
 func TestPredictIntonation(t *testing.T) {
 	t.Log("initialize")
 	core := setupCore()
