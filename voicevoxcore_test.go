@@ -115,7 +115,86 @@ func TestPredictDuration(t *testing.T) {
 
 	duration, _ := core.PredictDuration(1, phonemes)
 	assert.Equal(t, len(phonemes), len(duration))
+}
 
+func TestPredictIntonation(t *testing.T) {
+	t.Log("initialize")
+	core := setupCore()
+	defer core.Finalize()
+
+	t.Log("load model")
+	core.LoadModel(1)
+	t.Log("load model done")
+
+	// AudioQueryを生成
+	aqOptions := core.MakeDefaultAudioQueryOotions()
+	query, _ := core.AudioQuery("テストなのだね", 1, aqOptions)
+	accentPhrases := query.AccentPharases
+	var vowelPhonemeVector []int64
+	var consonantPhonemeVector []int64
+	var startAccentVector []int64
+	var endAccentVector []int64
+	var startAccentPharseVector []int64
+	var endAccentPharseVector []int64
+
+	// 最初の音素は無音
+	vowelPhonemeVector = append(vowelPhonemeVector, 0)
+	consonantPhonemeVector = append(consonantPhonemeVector, -1)
+	startAccentVector = append(startAccentVector, 0)
+	endAccentVector = append(endAccentVector, 0)
+	startAccentPharseVector = append(startAccentPharseVector, 0)
+	endAccentPharseVector = append(endAccentPharseVector, 0)
+
+	for _, ap := range accentPhrases {
+		moras := ap.Moras
+		accentPosition := ap.Accent - 1
+		for mi, m := range moras {
+			isAccentPositon := mi == int(accentPosition)
+
+			// アクセントの開始位置なら1、そうでなければ0
+			if isAccentPositon {
+				startAccentVector = append(startAccentVector, 1)
+			} else {
+				startAccentVector = append(startAccentVector, 0)
+			}
+
+			// 子音があればその音素のインデックス、なければ-1
+			if m.Consonant != "" {
+				consonantPhonemeVector = append(consonantPhonemeVector, int64(phonemeIndexOf(m.Consonant)))
+			} else {
+				consonantPhonemeVector = append(consonantPhonemeVector, -1)
+			}
+
+			// 母音の音素のインデックス
+			vowelPhonemeVector = append(vowelPhonemeVector, int64(phonemeIndexOf(m.Vowel)))
+
+			// アクセントの終了位置なら1、そうでなければ0
+			if isAccentPositon {
+				endAccentVector = append(endAccentVector, 1)
+			} else {
+				endAccentVector = append(endAccentVector, 0)
+			}
+
+			startAccentPharseVector = append(startAccentPharseVector, 0)
+			endAccentPharseVector = append(endAccentPharseVector, 0)
+		}
+	}
+	// 最後の音素は無音
+	vowelPhonemeVector = append(vowelPhonemeVector, 0)
+	consonantPhonemeVector = append(consonantPhonemeVector, -1)
+	startAccentVector = append(startAccentVector, 0)
+	endAccentVector = append(endAccentVector, 0)
+	startAccentPharseVector = append(startAccentPharseVector, 0)
+	endAccentPharseVector = append(endAccentPharseVector, 0)
+
+	length := len(vowelPhonemeVector)
+
+	f0, err := core.PredictIntonation(1, vowelPhonemeVector, consonantPhonemeVector, startAccentVector, endAccentVector, startAccentPharseVector, endAccentPharseVector)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, length, len(f0))
 }
 
 // nolint:errcheck
