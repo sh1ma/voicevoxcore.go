@@ -15,7 +15,7 @@ type VoicevoxCore struct {
 }
 
 // VoicevoxCore のコンストラクタ関数
-func NewVoicevoxCore() (core *VoicevoxCore) {
+func New() (core *VoicevoxCore) {
 	core = &VoicevoxCore{}
 	return
 }

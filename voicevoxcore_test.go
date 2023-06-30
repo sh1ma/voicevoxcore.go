@@ -244,7 +244,7 @@ func TestIsModelLoaded(t *testing.T) {
 }
 
 func setupCore() *voicevoxcorego.VoicevoxCore {
-	core := voicevoxcorego.NewVoicevoxCore()
+	core := voicevoxcorego.New()
 	initOptions := voicevoxcorego.NewVoicevoxInitializeOptions(0, 0, false, "./open_jtalk_dic_utf_8-1.11")
 	core.Initialize(initOptions) //nolint:errcheck
 

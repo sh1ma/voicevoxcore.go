@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	core := voicevoxcorego.NewVoicevoxCore()
+	core := voicevoxcorego.New()
 	initializeOptions := voicevoxcorego.NewVoicevoxInitializeOptions(0, 0, false, "./open_jtalk_dic_utf_8-1.11")
 
 	core.Initialize(initializeOptions)
