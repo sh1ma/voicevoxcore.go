@@ -109,14 +109,14 @@ func (o *VoicevoxSynthesisOptions) UpdateInterrogativeUpspeak(kana bool) {
 /*
 `Tts()`の初期化オプションを生成する関数
 */
-func NewVoicevoxTtsOptions(kana bool, enableInterrogativeUpspeak bool) (options VoicevoxTtsOptions) {
+func NewVoicevoxTtsOptions(kana bool, enableInterrogativeUpspeak bool) *VoicevoxTtsOptions {
 	raw := C.VoicevoxTtsOptions{
 		kana:                         C.bool(kana),
 		enable_interrogative_upspeak: C.bool(enableInterrogativeUpspeak),
 	}
 
-	options = VoicevoxTtsOptions{raw: &raw}
-	return
+	options := &VoicevoxTtsOptions{raw: &raw}
+	return options
 }
 
 /*
