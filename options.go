@@ -29,15 +29,15 @@ type (
 /*
 `VoiceVoxCore`の初期化オプションを生成する関数
 */
-func NewVoicevoxInitializeOptions(accelerationMode int, cpuNumThreads int, loadAllModels bool, openJtalkDictDir string) (options VoicevoxInitializeOptions) {
+func NewVoicevoxInitializeOptions(accelerationMode int, cpuNumThreads int, loadAllModels bool, openJtalkDictDir string) *VoicevoxInitializeOptions {
 	raw := C.VoicevoxInitializeOptions{
 		acceleration_mode:   C.int(accelerationMode),
 		cpu_num_threads:     C.ushort(cpuNumThreads),
 		load_all_models:     C.bool(loadAllModels),
 		open_jtalk_dict_dir: C.CString(openJtalkDictDir),
 	}
-	options = VoicevoxInitializeOptions{raw: &raw}
-	return
+	options := &VoicevoxInitializeOptions{raw: &raw}
+	return options
 }
 
 /*
@@ -71,13 +71,13 @@ func (o *VoicevoxInitializeOptions) UpdateOpenJtalkDictDir(openJtalkDictDir stri
 /*
 `AudioQuery()`の初期化オプションを生成する関数
 */
-func NewVoicevoxAudioQueryOptions(kana bool) (options VoicevoxAudioQueryOptions) {
+func NewVoicevoxAudioQueryOptions(kana bool) *VoicevoxAudioQueryOptions {
 	raw := C.VoicevoxAudioQueryOptions{
 		kana: C.bool(kana),
 	}
 
-	options = VoicevoxAudioQueryOptions{raw: &raw}
-	return
+	options := &VoicevoxAudioQueryOptions{raw: &raw}
+	return options
 }
 
 /*
@@ -90,13 +90,13 @@ func (o *VoicevoxAudioQueryOptions) UpdateKana(kana bool) {
 /*
 `Synthesis()`の初期化オプションを生成する関数
 */
-func NewVoicevoxSynthesisOptions(enableInterrogativeUpspeak bool) (options VoicevoxSynthesisOptions) {
+func NewVoicevoxSynthesisOptions(enableInterrogativeUpspeak bool) *VoicevoxSynthesisOptions {
 	raw := C.VoicevoxSynthesisOptions{
 		enable_interrogative_upspeak: C.bool(enableInterrogativeUpspeak),
 	}
 
-	options = VoicevoxSynthesisOptions{raw: &raw}
-	return
+	options := &VoicevoxSynthesisOptions{raw: &raw}
+	return options
 }
 
 /*
@@ -109,14 +109,14 @@ func (o *VoicevoxSynthesisOptions) UpdateInterrogativeUpspeak(kana bool) {
 /*
 `Tts()`の初期化オプションを生成する関数
 */
-func NewVoicevoxTtsOptions(kana bool, enableInterrogativeUpspeak bool) (options VoicevoxTtsOptions) {
+func NewVoicevoxTtsOptions(kana bool, enableInterrogativeUpspeak bool) *VoicevoxTtsOptions {
 	raw := C.VoicevoxTtsOptions{
 		kana:                         C.bool(kana),
 		enable_interrogative_upspeak: C.bool(enableInterrogativeUpspeak),
 	}
 
-	options = VoicevoxTtsOptions{raw: &raw}
-	return
+	options := &VoicevoxTtsOptions{raw: &raw}
+	return options
 }
 
 /*

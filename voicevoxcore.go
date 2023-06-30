@@ -15,13 +15,13 @@ type VoicevoxCore struct {
 }
 
 // VoicevoxCore のコンストラクタ関数
-func NewVoicevoxCore() (core VoicevoxCore) {
-	core = VoicevoxCore{}
+func NewVoicevoxCore() (core *VoicevoxCore) {
+	core = &VoicevoxCore{}
 	return
 }
 
 // C APIを通じてVoicevox_coreを初期化する関数
-func (r *VoicevoxCore) Initialize(options VoicevoxInitializeOptions) error {
+func (r *VoicevoxCore) Initialize(options *VoicevoxInitializeOptions) error {
 	if r.initialized {
 		err := xerrors.Errorf("Already initialized")
 		return err
@@ -51,7 +51,7 @@ Text to Speechを実行する関数。実行結果はwavファイルフォーマ
 
 Sample: https://github.com/sh1ma/sample-tts
 */
-func (r *VoicevoxCore) Tts(text string, speakerID int, options VoicevoxTtsOptions) ([]byte, error) {
+func (r *VoicevoxCore) Tts(text string, speakerID int, options *VoicevoxTtsOptions) ([]byte, error) {
 	ctext := C.CString(text)
 	cspeakerID := C.uint(speakerID)
 
@@ -74,9 +74,9 @@ Audio Queryを基に音声合成を実行する関数。実行結果はwavファ
 Sample: https://github.com/sh1ma/sample-synthesis
 */
 func (r *VoicevoxCore) Synthesis(
-	audioQuery AudioQuery,
+	audioQuery *AudioQuery,
 	speakerID int,
-	options VoicevoxSynthesisOptions,
+	options *VoicevoxSynthesisOptions,
 ) ([]byte, error) {
 
 	// クエリの構造体をJSON文字列に変換する
@@ -111,31 +111,31 @@ func (r *VoicevoxCore) getWavBin(dataPointer *C.uchar, sizePointer *C.ulong) []b
 }
 
 // `Initialize()` のデフォルトオプションを生成する
-func (r *VoicevoxCore) MakeDefaultInitializeOptions() VoicevoxInitializeOptions {
+func (r *VoicevoxCore) MakeDefaultInitializeOptions() *VoicevoxInitializeOptions {
 	raw := r.voicevoxMakeDefaultInitializeOptions()
-	return VoicevoxInitializeOptions{raw: &raw}
+	return &VoicevoxInitializeOptions{raw: &raw}
 }
 
 // `Tts()` のデフォルトオプションを生成する
-func (r *VoicevoxCore) MakeDefaultTtsOotions() VoicevoxTtsOptions {
+func (r *VoicevoxCore) MakeDefaultTtsOotions() *VoicevoxTtsOptions {
 	raw := r.voicevoxMakeDefaultTtsOptions()
-	return VoicevoxTtsOptions{raw: &raw}
+	return &VoicevoxTtsOptions{raw: &raw}
 }
 
 // `AudioQuery()` のデフォルトオプションを生成する
-func (r *VoicevoxCore) MakeDefaultAudioQueryOotions() VoicevoxAudioQueryOptions {
+func (r *VoicevoxCore) MakeDefaultAudioQueryOotions() *VoicevoxAudioQueryOptions {
 	raw := r.voicevoxMakeDefaultAudioQueryOptions()
-	return VoicevoxAudioQueryOptions{raw: &raw}
+	return &VoicevoxAudioQueryOptions{raw: &raw}
 }
 
 // `Synthesis()` のデフォルトオプションを生成する
-func (r *VoicevoxCore) MakeDefaultSynthesisOotions() VoicevoxSynthesisOptions {
+func (r *VoicevoxCore) MakeDefaultSynthesisOotions() *VoicevoxSynthesisOptions {
 	raw := r.voicevoxMakeDefaultSynthesisOptions()
-	return VoicevoxSynthesisOptions{raw: &raw}
+	return &VoicevoxSynthesisOptions{raw: &raw}
 }
 
 // オーディオクエリを発行する
-func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) (AudioQuery, error) {
+func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options *VoicevoxAudioQueryOptions) (*AudioQuery, error) {
 	ctext := C.CString(text)
 	cSpeakerID := C.uint(speakerID)
 
@@ -147,14 +147,14 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 	code := r.voicevoxAudioQuery(ctext, cSpeakerID, *options.raw, datap)
 	if code != 0 {
 		err := r.raiseError(code)
-		return AudioQuery{}, err
+		return &AudioQuery{}, err
 	}
 
 	queryJsonBytes := []byte(C.GoString(*datap))
 
 	audioQuery, err := NewAudioQueryFromJson(queryJsonBytes)
 	if err != nil {
-		return AudioQuery{}, err
+		return &AudioQuery{}, err
 	}
 
 	return audioQuery, nil
