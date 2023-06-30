@@ -74,7 +74,7 @@ Audio Queryを基に音声合成を実行する関数。実行結果はwavファ
 Sample: https://github.com/sh1ma/sample-synthesis
 */
 func (r *VoicevoxCore) Synthesis(
-	audioQuery AudioQuery,
+	audioQuery *AudioQuery,
 	speakerID int,
 	options VoicevoxSynthesisOptions,
 ) ([]byte, error) {
@@ -135,7 +135,7 @@ func (r *VoicevoxCore) MakeDefaultSynthesisOotions() VoicevoxSynthesisOptions {
 }
 
 // オーディオクエリを発行する
-func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) (AudioQuery, error) {
+func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxAudioQueryOptions) (*AudioQuery, error) {
 	ctext := C.CString(text)
 	cSpeakerID := C.uint(speakerID)
 
@@ -147,14 +147,14 @@ func (r *VoicevoxCore) AudioQuery(text string, speakerID uint, options VoicevoxA
 	code := r.voicevoxAudioQuery(ctext, cSpeakerID, *options.raw, datap)
 	if code != 0 {
 		err := r.raiseError(code)
-		return AudioQuery{}, err
+		return &AudioQuery{}, err
 	}
 
 	queryJsonBytes := []byte(C.GoString(*datap))
 
 	audioQuery, err := NewAudioQueryFromJson(queryJsonBytes)
 	if err != nil {
-		return AudioQuery{}, err
+		return &AudioQuery{}, err
 	}
 
 	return audioQuery, nil

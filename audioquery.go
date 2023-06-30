@@ -104,11 +104,11 @@ func (q *AudioQuery) ToJsonString() (string, error) {
 /*
 Jsonのバイト列からAudioQuery構造体を生成する
 */
-func NewAudioQueryFromJson(queryJson []byte) (AudioQuery, error) {
+func NewAudioQueryFromJson(queryJson []byte) (*AudioQuery, error) {
 	var query AudioQuery
 	err := json.Unmarshal(queryJson, &query)
 	if err != nil {
-		return AudioQuery{}, err
+		return &AudioQuery{}, err
 	}
-	return query, nil
+	return &query, nil
 }
