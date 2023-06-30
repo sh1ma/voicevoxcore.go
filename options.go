@@ -90,13 +90,13 @@ func (o *VoicevoxAudioQueryOptions) UpdateKana(kana bool) {
 /*
 `Synthesis()`の初期化オプションを生成する関数
 */
-func NewVoicevoxSynthesisOptions(enableInterrogativeUpspeak bool) (options VoicevoxSynthesisOptions) {
+func NewVoicevoxSynthesisOptions(enableInterrogativeUpspeak bool) *VoicevoxSynthesisOptions {
 	raw := C.VoicevoxSynthesisOptions{
 		enable_interrogative_upspeak: C.bool(enableInterrogativeUpspeak),
 	}
 
-	options = VoicevoxSynthesisOptions{raw: &raw}
-	return
+	options := VoicevoxSynthesisOptions{raw: &raw}
+	return &options
 }
 
 /*
