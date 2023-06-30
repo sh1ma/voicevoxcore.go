@@ -243,7 +243,7 @@ func TestIsModelLoaded(t *testing.T) {
 	assert.Equal(t, core.IsModelLoaded(1), true)
 }
 
-func setupCore() voicevoxcorego.VoicevoxCore {
+func setupCore() *voicevoxcorego.VoicevoxCore {
 	core := voicevoxcorego.NewVoicevoxCore()
 	initOptions := voicevoxcorego.NewVoicevoxInitializeOptions(0, 0, false, "./open_jtalk_dic_utf_8-1.11")
 	core.Initialize(initOptions) //nolint:errcheck
