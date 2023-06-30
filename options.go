@@ -71,13 +71,13 @@ func (o *VoicevoxInitializeOptions) UpdateOpenJtalkDictDir(openJtalkDictDir stri
 /*
 `AudioQuery()`の初期化オプションを生成する関数
 */
-func NewVoicevoxAudioQueryOptions(kana bool) (options VoicevoxAudioQueryOptions) {
+func NewVoicevoxAudioQueryOptions(kana bool) *VoicevoxAudioQueryOptions {
 	raw := C.VoicevoxAudioQueryOptions{
 		kana: C.bool(kana),
 	}
 
-	options = VoicevoxAudioQueryOptions{raw: &raw}
-	return
+	options := &VoicevoxAudioQueryOptions{raw: &raw}
+	return options
 }
 
 /*
@@ -95,8 +95,8 @@ func NewVoicevoxSynthesisOptions(enableInterrogativeUpspeak bool) *VoicevoxSynth
 		enable_interrogative_upspeak: C.bool(enableInterrogativeUpspeak),
 	}
 
-	options := VoicevoxSynthesisOptions{raw: &raw}
-	return &options
+	options := &VoicevoxSynthesisOptions{raw: &raw}
+	return options
 }
 
 /*
