@@ -29,15 +29,15 @@ type (
 /*
 `VoiceVoxCore`の初期化オプションを生成する関数
 */
-func NewVoicevoxInitializeOptions(accelerationMode int, cpuNumThreads int, loadAllModels bool, openJtalkDictDir string) (options VoicevoxInitializeOptions) {
+func NewVoicevoxInitializeOptions(accelerationMode int, cpuNumThreads int, loadAllModels bool, openJtalkDictDir string) *VoicevoxInitializeOptions {
 	raw := C.VoicevoxInitializeOptions{
 		acceleration_mode:   C.int(accelerationMode),
 		cpu_num_threads:     C.ushort(cpuNumThreads),
 		load_all_models:     C.bool(loadAllModels),
 		open_jtalk_dict_dir: C.CString(openJtalkDictDir),
 	}
-	options = VoicevoxInitializeOptions{raw: &raw}
-	return
+	options := &VoicevoxInitializeOptions{raw: &raw}
+	return options
 }
 
 /*
