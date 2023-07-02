@@ -7,6 +7,12 @@
 voicevoxcore.go は[voicevox_core](https://github.com/VOICEVOX/voicevox_core)を Go 言語で使えるラッパーです。
 FFI を用いて、voicevox_core の C API を呼んでいます。
 
+# インストール
+
+```
+go get https://github.com/sh1ma/voicevoxcore.go
+```
+
 ## 例
 
 以下は本ライブラリを使用して Text to Speech を行う例です。
@@ -25,18 +31,13 @@ import (
 )
 
 func main() {
-	args := os.Args
-	if len(args) < 2 {
-		fmt.Println("usage:\n\tgo run tts.go [ text ]")
-		os.Exit(127)
-	}
-	text := os.Args[1]
+	text := "ずんだもんなのだ"
 
 	core := voicevoxcorego.NewVoicevoxCore()
 	initializeOptions := voicevoxcorego.NewVoicevoxInitializeOptions(0, 0, false, "./open_jtalk_dic_utf_8-1.11")
 	core.Initialize(initializeOptions)
 
-	core.LoadModel(1)
+	core.LoadModel(3)
 
 	ttsOptions := voicevoxcorego.NewVoicevoxTtsOptions(false, true)
 	result, err := core.Tts(text, 1, ttsOptions)
