@@ -7,7 +7,7 @@
 voicevoxcore.go は[voicevox_core](https://github.com/VOICEVOX/voicevox_core)を Go 言語で使えるラッパーです。
 FFI を用いて、voicevox_core の C API を呼んでいます。
 
-# インストール
+## インストール
 
 ```
 go get https://github.com/sh1ma/voicevoxcore.go
